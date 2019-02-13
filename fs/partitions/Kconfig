@@ -1,0 +1,30 @@
+#
+# Partition configuration
+#
+config PARTITION_ADVANCED
+	bool "Advanced partition selection"
+	help
+	  Say Y here if you would like to use hard disks under Linux which
+	  were partitioned under an operating system running on a different
+	  architecture than your Linux system.
+
+	  Note that the answer to this question won't directly affect the
+	  kernel: saying N will just cause the configurator to skip all
+	  the questions about foreign partitioning schemes.
+
+	  If unsure, say N.
+
+config MSDOS_PARTITION
+	bool "PC BIOS (MSDOS partition tables) support" if PARTITION_ADVANCED
+	default y
+	help
+	  Say Y here.
+
+config EFI_PARTITION
+	bool "EFI GUID Partition support"
+	depends on PARTITION_ADVANCED
+	select CRC32
+	help
+	  Say Y here if you would like to use hard disks under Linux which
+	  were partitioned using EFI GPT.  Presently only useful on the
+	  IA-64 platform.

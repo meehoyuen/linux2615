@@ -1,0 +1,1 @@
+#define CONFIG_ACPI_DEV_MODULE 1

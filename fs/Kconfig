@@ -1,0 +1,508 @@
+#
+# File system configuration
+#
+
+menu "File systems"
+
+config EXT2_FS
+	tristate "Second extended fs support"
+	help
+	  Ext2 is a standard Linux file system for hard disks.
+
+	  To compile this file system support as a module, choose M here: the
+	  module will be called ext2.  Be aware however that the file system
+	  of your root partition (the one containing the directory /) cannot
+	  be compiled as a module, and so this could be dangerous.
+
+	  If unsure, say Y.
+
+config EXT2_FS_XATTR
+	bool "Ext2 extended attributes"
+	depends on EXT2_FS
+	help
+	  Extended attributes are name:value pairs associated with inodes by
+	  the kernel or by users (see the attr(5) manual page, or visit
+	  <http://acl.bestbits.at/> for details).
+
+	  If unsure, say N.
+
+config EXT2_FS_POSIX_ACL
+	bool "Ext2 POSIX Access Control Lists"
+	depends on EXT2_FS_XATTR
+	select FS_POSIX_ACL
+	help
+	  Posix Access Control Lists (ACLs) support permissions for users and
+	  groups beyond the owner/group/world scheme.
+
+	  To learn more about Access Control Lists, visit the Posix ACLs for
+	  Linux website <http://acl.bestbits.at/>.
+
+	  If you don't know what Access Control Lists are, say N
+
+config EXT3_FS
+	tristate "Ext3 journalling file system support"
+	select JBD
+	help
+	  This is the journaling version of the Second extended file system
+	  (often called ext3), the de facto standard Linux file system
+	  (method to organize files on a storage device) for hard disks.
+
+	  The journaling code included in this driver means you do not have
+	  to run e2fsck (file system checker) on your file systems after a
+	  crash.  The journal keeps track of any changes that were being made
+	  at the time the system crashed, and can ensure that your file system
+	  is consistent without the need for a lengthy check.
+
+	  Other than adding the journal to the file system, the on-disk format
+	  of ext3 is identical to ext2.  It is possible to freely switch
+	  between using the ext3 driver and the ext2 driver, as long as the
+	  file system has been cleanly unmounted, or e2fsck is run on the file
+	  system.
+
+	  To add a journal on an existing ext2 file system or change the
+	  behavior of ext3 file systems, you can use the tune2fs utility ("man
+	  tune2fs").  To modify attributes of files and directories on ext3
+	  file systems, use chattr ("man chattr").  You need to be using
+	  e2fsprogs version 1.20 or later in order to create ext3 journals
+	  (available at <http://sourceforge.net/projects/e2fsprogs/>).
+
+	  To compile this file system support as a module, choose M here: the
+	  module will be called ext3.  Be aware however that the file system
+	  of your root partition (the one containing the directory /) cannot
+	  be compiled as a module, and so this may be dangerous.
+
+config EXT3_FS_XATTR
+	bool "Ext3 extended attributes"
+	depends on EXT3_FS
+	default y
+	help
+	  Extended attributes are name:value pairs associated with inodes by
+	  the kernel or by users (see the attr(5) manual page, or visit
+	  <http://acl.bestbits.at/> for details).
+
+	  If unsure, say N.
+
+	  You need this for POSIX ACL support on ext3.
+
+config EXT3_FS_POSIX_ACL
+	bool "Ext3 POSIX Access Control Lists"
+	depends on EXT3_FS_XATTR
+	select FS_POSIX_ACL
+	help
+	  Posix Access Control Lists (ACLs) support permissions for users and
+	  groups beyond the owner/group/world scheme.
+
+	  To learn more about Access Control Lists, visit the Posix ACLs for
+	  Linux website <http://acl.bestbits.at/>.
+
+	  If you don't know what Access Control Lists are, say N
+
+config JBD
+	tristate
+	help
+	  This is a generic journaling layer for block devices.  It is
+	  currently used by the ext3 and OCFS2 file systems, but it could
+	  also be used to add journal support to other file systems or block
+	  devices such as RAID or LVM.
+
+	  If you are using the ext3 or OCFS2 file systems, you need to
+	  say Y here. If you are not using ext3 OCFS2 then you will probably
+	  want to say N.
+
+	  To compile this device as a module, choose M here: the module will be
+	  called jbd.  If you are compiling ext3 or OCFS2 into the kernel,
+	  you cannot compile this code as a module.
+
+config JBD_DEBUG
+	bool "JBD (ext3) debugging support"
+	depends on JBD
+	help
+	  If you are using the ext3 journaled file system (or potentially any
+	  other file system/device using JBD), this option allows you to
+	  enable debugging output while the system is running, in order to
+	  help track down any problems you are having.  By default the
+	  debugging output will be turned off.
+
+	  If you select Y here, then you will be able to turn on debugging
+	  with "echo N > /proc/sys/fs/jbd-debug", where N is a number between
+	  1 and 5, the higher the number, the more debugging output is
+	  generated.  To turn debugging off again, do
+	  "echo 0 > /proc/sys/fs/jbd-debug".
+
+config FS_MBCACHE
+# Meta block cache for Extended Attributes (ext2/ext3)
+	bool
+	depends on EXT2_FS_XATTR || EXT3_FS_XATTR
+	default y if EXT2_FS=y || EXT3_FS=y
+	default y if EXT2_FS=m || EXT3_FS=m
+
+config FS_POSIX_ACL
+# Posix ACL utility routines (for now, only ext2/ext3/jfs/reiserfs)
+#
+# NOTE: you can implement Posix ACLs without these helpers (XFS does).
+# 	Never use this symbol for ifdefs.
+#
+	bool
+	default n
+
+config INOTIFY
+	bool "Inotify file change notification support"
+	default y
+	---help---
+	  Say Y here to enable inotify support and the associated system
+	  calls.  Inotify is a file change notification system and a
+	  replacement for dnotify.  Inotify fixes numerous shortcomings in
+	  dnotify and introduces several new features.  It allows monitoring
+	  of both files and directories via a single open fd.  Other features
+	  include multiple file events, one-shot support, and unmount
+	  notification.
+
+	  For more information, see Documentation/filesystems/inotify.txt
+
+	  If unsure, say Y.
+
+config DNOTIFY
+	bool "Dnotify support" if EMBEDDED
+	default y
+	help
+	  Dnotify is a directory-based per-fd file change notification system
+	  that uses signals to communicate events to user-space.  There exist
+	  superior alternatives, but some applications may still rely on
+	  dnotify.
+
+	  Because of this, if unsure, say Y.
+
+config AUTOFS_FS
+	tristate "Kernel automounter support"
+	help
+	  The automounter is a tool to automatically mount remote file systems
+	  on demand. This implementation is partially kernel-based to reduce
+	  overhead in the already-mounted case; this is unlike the BSD
+	  automounter (amd), which is a pure user space daemon.
+
+	  To use the automounter you need the user-space tools from the autofs
+	  package; you can find the location in <file:Documentation/Changes>.
+	  You also want to answer Y to "NFS file system support", below.
+
+	  If you want to use the newer version of the automounter with more
+	  features, say N here and say Y to "Kernel automounter v4 support",
+	  below.
+
+	  To compile this support as a module, choose M here: the module will be
+	  called autofs.
+
+	  If you are not a part of a fairly large, distributed network, you
+	  probably do not need an automounter, and can say N here.
+
+config AUTOFS4_FS
+	tristate "Kernel automounter version 4 support (also supports v3)"
+	help
+	  The automounter is a tool to automatically mount remote file systems
+	  on demand. This implementation is partially kernel-based to reduce
+	  overhead in the already-mounted case; this is unlike the BSD
+	  automounter (amd), which is a pure user space daemon.
+
+	  To use the automounter you need the user-space tools from
+	  <ftp://ftp.kernel.org/pub/linux/daemons/autofs/v4/>; you also
+	  want to answer Y to "NFS file system support", below.
+
+	  To compile this support as a module, choose M here: the module will be
+	  called autofs4.  You will need to add "alias autofs autofs4" to your
+	  modules configuration file.
+
+	  If you are not a part of a fairly large, distributed network or
+	  don't have a laptop which needs to dynamically reconfigure to the
+	  local network, you probably do not need an automounter, and can say
+	  N here.
+
+menu "CD-ROM/DVD Filesystems"
+
+config ISO9660_FS
+	tristate "ISO 9660 CDROM file system support"
+	help
+	  This is the standard file system used on CD-ROMs.  It was previously
+	  known as "High Sierra File System" and is called "hsfs" on other
+	  Unix systems.  The so-called Rock-Ridge extensions which allow for
+	  long Unix filenames and symbolic links are also supported by this
+	  driver.  If you have a CD-ROM drive and want to do more with it than
+	  just listen to audio CDs and watch its LEDs, say Y (and read
+	  <file:Documentation/filesystems/isofs.txt> and the CD-ROM-HOWTO,
+	  available from <http://www.tldp.org/docs.html#howto>), thereby
+	  enlarging your kernel by about 27 KB; otherwise say N.
+
+	  To compile this file system support as a module, choose M here: the
+	  module will be called isofs.
+
+config JOLIET
+	bool "Microsoft Joliet CDROM extensions"
+	depends on ISO9660_FS
+	select NLS
+	help
+	  Joliet is a Microsoft extension for the ISO 9660 CD-ROM file system
+	  which allows for long filenames in unicode format (unicode is the
+	  new 16 bit character code, successor to ASCII, which encodes the
+	  characters of almost all languages of the world; see
+	  <http://www.unicode.org/> for more information).  Say Y here if you
+	  want to be able to read Joliet CD-ROMs under Linux.
+
+endmenu
+
+menu "Pseudo filesystems"
+
+config PROC_FS
+	bool "/proc file system support"
+	help
+	  This is a virtual file system providing information about the status
+	  of the system. "Virtual" means that it doesn't take up any space on
+	  your hard disk: the files are created on the fly by the kernel when
+	  you try to access them. Also, you cannot read the files with older
+	  version of the program less: you need to use more or cat.
+
+	  It's totally cool; for example, "cat /proc/interrupts" gives
+	  information about what the different IRQs are used for at the moment
+	  (there is a small number of Interrupt ReQuest lines in your computer
+	  that are used by the attached devices to gain the CPU's attention --
+	  often a source of trouble if two devices are mistakenly configured
+	  to use the same IRQ). The program procinfo to display some
+	  information about your system gathered from the /proc file system.
+
+	  Before you can use the /proc file system, it has to be mounted,
+	  meaning it has to be given a location in the directory hierarchy.
+	  That location should be /proc. A command such as "mount -t proc proc
+	  /proc" or the equivalent line in /etc/fstab does the job.
+
+	  The /proc file system is explained in the file
+	  <file:Documentation/filesystems/proc.txt> and on the proc(5) manpage
+	  ("man 5 proc").
+
+	  This option will enlarge your kernel by about 67 KB. Several
+	  programs depend on this, so everyone should say Y here.
+
+config PROC_KCORE
+	bool "/proc/kcore support" if !ARM
+	depends on PROC_FS && MMU
+
+config PROC_VMCORE
+        bool "/proc/vmcore support (EXPERIMENTAL)"
+        depends on PROC_FS && EMBEDDED && EXPERIMENTAL && CRASH_DUMP
+        help
+        Exports the dump image of crashed kernel in ELF format.
+
+config SYSFS
+	bool "sysfs file system support" if EMBEDDED
+	default y
+	help
+	The sysfs filesystem is a virtual filesystem that the kernel uses to
+	export internal kernel objects, their attributes, and their
+	relationships to one another.
+
+	Users can use sysfs to ascertain useful information about the running
+	kernel, such as the devices the kernel has discovered on each bus and
+	which driver each is bound to. sysfs can also be used to tune devices
+	and other kernel subsystems.
+
+	Some system agents rely on the information in sysfs to operate.
+	/sbin/hotplug uses device and object attributes in sysfs to assist in
+	delegating policy decisions, like persistantly naming devices.
+
+	sysfs is currently used by the block subsystem to mount the root
+	partition.  If sysfs is disabled you must specify the boot device on
+	the kernel boot command line via its major and minor numbers.  For
+	example, "root=03:01" for /dev/hda1.
+
+	Designers of embedded systems may wish to say N here to conserve space.
+
+config TMPFS
+	bool "Virtual memory file system support (former shm fs)"
+	help
+	  Tmpfs is a file system which keeps all files in virtual memory.
+
+	  Everything in tmpfs is temporary in the sense that no files will be
+	  created on your hard drive. The files live in memory and swap
+	  space. If you unmount a tmpfs instance, everything stored therein is
+	  lost.
+
+	  See <file:Documentation/filesystems/tmpfs.txt> for details.
+
+config HUGETLBFS
+	bool "HugeTLB file system support"
+	depends X86 || IA64 || PPC64 || SPARC64 || SUPERH || BROKEN
+
+config HUGETLB_PAGE
+	def_bool HUGETLBFS
+
+config RAMFS
+	bool
+	default y
+	---help---
+	  Ramfs is a file system which keeps all files in RAM. It allows
+	  read and write access.
+
+	  It is more of an programming example than a useable file system.  If
+	  you need a file system which lives in RAM with limit checking use
+	  tmpfs.
+
+	  To compile this as a module, choose M here: the module will be called
+	  ramfs.
+
+config RELAYFS_FS
+	tristate "Relayfs file system support"
+	---help---
+	  Relayfs is a high-speed data relay filesystem designed to provide
+	  an efficient mechanism for tools and facilities to relay large
+	  amounts of data from kernel space to user space.
+
+	  To compile this code as a module, choose M here: the module will be
+	  called relayfs.
+
+	  If unsure, say N.
+
+endmenu
+
+menu "Network File Systems"
+	depends on NET
+
+config NFS_FS
+	tristate "NFS file system support"
+	depends on INET
+	select LOCKD
+	select SUNRPC
+	help
+	  If you are connected to some other (usually local) Unix computer
+	  (using SLIP, PLIP, PPP or Ethernet) and want to mount files residing
+	  on that computer (the NFS server) using the Network File Sharing
+	  protocol, say Y. "Mounting files" means that the client can access
+	  the files with usual UNIX commands as if they were sitting on the
+	  client's hard disk. For this to work, the server must run the
+	  programs nfsd and mountd (but does not need to have NFS file system
+	  support enabled in its kernel). NFS is explained in the Network
+	  Administrator's Guide, available from
+	  <http://www.tldp.org/docs.html#guide>, on its man page: "man
+	  nfs", and in the NFS-HOWTO.
+
+	  A superior but less widely used alternative to NFS is provided by
+	  the Coda file system; see "Coda file system support" below.
+
+	  If you say Y here, you should have said Y to TCP/IP networking also.
+	  This option would enlarge your kernel by about 27 KB.
+
+	  To compile this file system support as a module, choose M here: the
+	  module will be called nfs.
+
+	  If you are configuring a diskless machine which will mount its root
+	  file system over NFS at boot time, say Y here and to "Kernel
+	  level IP autoconfiguration" above and to "Root file system on NFS"
+	  below. You cannot compile this driver as a module in this case.
+	  There are two packages designed for booting diskless machines over
+	  the net: netboot, available from
+	  <http://ftp1.sourceforge.net/netboot/>, and Etherboot,
+	  available from <http://ftp1.sourceforge.net/etherboot/>.
+
+	  If you don't know what all this is about, say N.
+
+config NFS_V3
+	bool "Provide NFSv3 client support"
+	depends on NFS_FS
+	help
+	  Say Y here if you want your NFS client to be able to speak version
+	  3 of the NFS protocol.
+
+	  If unsure, say Y.
+
+config NFS_V3_ACL
+	bool "Provide client support for the NFSv3 ACL protocol extension"
+	depends on NFS_V3
+	help
+	  Implement the NFSv3 ACL protocol extension for manipulating POSIX
+	  Access Control Lists.  The server should also be compiled with
+	  the NFSv3 ACL protocol extension; see the CONFIG_NFSD_V3_ACL option.
+
+	  If unsure, say N.
+
+config NFSD
+	tristate "NFS server support"
+	depends on INET
+	select LOCKD
+	select SUNRPC
+	select EXPORTFS
+	help
+	  If you want your Linux box to act as an NFS *server*, so that other
+	  computers on your local network which support NFS can access certain
+	  directories on your box transparently, you have two options: you can
+	  use the self-contained user space program nfsd, in which case you
+	  should say N here, or you can say Y and use the kernel based NFS
+	  server. The advantage of the kernel based solution is that it is
+	  faster.
+
+	  In either case, you will need support software; the respective
+	  locations are given in the file <file:Documentation/Changes> in the
+	  NFS section.
+
+	  If you say Y here, you will get support for version 2 of the NFS
+	  protocol (NFSv2). If you also want NFSv3, say Y to the next question
+	  as well.
+
+	  Please read the NFS-HOWTO, available from
+	  <http://www.tldp.org/docs.html#howto>.
+
+	  To compile the NFS server support as a module, choose M here: the
+	  module will be called nfsd.  If unsure, say N.
+
+config NFSD_V3
+	bool "Provide NFSv3 server support"
+	depends on NFSD
+	help
+	  If you would like to include the NFSv3 server as well as the NFSv2
+	  server, say Y here.  If unsure, say Y.
+
+config NFSD_TCP
+	bool "Provide NFS server over TCP support"
+	depends on NFSD
+	default y
+	help
+	  If you want your NFS server to support TCP connections, say Y here.
+	  TCP connections usually perform better than the default UDP when
+	  the network is lossy or congested.  If unsure, say Y.
+
+config ROOT_NFS
+	bool "Root file system on NFS"
+	depends on NFS_FS=y && IP_PNP
+	help
+	  If you want your Linux box to mount its whole root file system (the
+	  one containing the directory /) from some other computer over the
+	  net via NFS (presumably because your box doesn't have a hard disk),
+	  say Y. Read <file:Documentation/nfsroot.txt> for details. It is
+	  likely that in this case, you also want to say Y to "Kernel level IP
+	  autoconfiguration" so that your box can discover its network address
+	  at boot time.
+
+	  Most people say N here.
+
+config LOCKD
+	tristate
+
+config LOCKD_V4
+	bool
+	depends on NFSD_V3 || NFS_V3
+	default y
+
+config EXPORTFS
+	tristate
+
+config SUNRPC
+	tristate
+
+config SUNRPC_GSS
+	tristate
+
+endmenu
+
+menu "Partition Types"
+
+source "fs/partitions/Kconfig"
+
+endmenu
+
+source "fs/nls/Kconfig"
+
+endmenu

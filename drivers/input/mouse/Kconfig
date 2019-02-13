@@ -1,0 +1,39 @@
+#
+# Mouse driver configuration
+#
+menuconfig INPUT_MOUSE
+	bool "Mouse"
+	default y
+	help
+	  Say Y here, and a list of supported mice will be displayed.
+	  This option doesn't affect the kernel.
+
+	  If unsure, say Y.
+
+if INPUT_MOUSE
+
+config MOUSE_PS2
+	tristate "PS/2 mouse"
+	default y
+	select SERIO
+	select SERIO_LIBPS2
+	select SERIO_I8042 if X86_PC
+	---help---
+	  Say Y here if you have a PS/2 mouse connected to your system. This
+	  includes the standard 2 or 3-button PS/2 mouse, as well as PS/2
+	  mice with wheels and extra buttons, Microsoft, Logitech or Genius
+	  compatible.
+
+	  Synaptics TouchPad users might be interested in a specialized
+	  XFree86 driver at:
+		<http://w1.894.telia.com/~u89404340/touchpad/index.html>
+	  and a new version of GPM at:
+		<http://www.geocities.com/dt_or/gpm/gpm.html>
+	  to take advantage of the advanced features of the touchpad.
+
+	  If unsure, say Y.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called psmouse.
+
+endif

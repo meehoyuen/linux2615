@@ -1,0 +1,32 @@
+#
+# Input core configuration
+#
+menuconfig INPUT_KEYBOARD
+	bool "Keyboards" if EMBEDDED || !X86
+	default y
+	help
+	  Say Y here, and a list of supported keyboards will be displayed.
+	  This option doesn't affect the kernel.
+
+	  If unsure, say Y.
+
+if INPUT_KEYBOARD
+
+config KEYBOARD_ATKBD
+	tristate "AT keyboard" if !X86_PC
+	default y
+	select SERIO
+	select SERIO_LIBPS2
+	select SERIO_I8042 if X86_PC
+	help
+	  Say Y here if you want to use a standard AT or PS/2 keyboard. Usually
+	  you'll need this, unless you have a different type keyboard (USB, ADB
+	  or other). This also works for AT and PS/2 keyboards connected over a
+	  PS/2 to serial converter.
+
+	  If unsure, say Y.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called atkbd.
+
+endif

@@ -1,0 +1,113 @@
+#
+# Network configuration
+#
+
+menu "Networking"
+
+config NET
+	bool "Networking support"
+	---help---
+	  Unless you really know what you are doing, you should say Y here.
+	  The reason is that some programs need kernel networking support even
+	  when running on a stand-alone machine that isn't connected to any
+	  other computer.
+	  
+	  If you are upgrading from an older kernel, you
+	  should consider updating your networking tools too because changes
+	  in the kernel and the tools often go hand in hand. The tools are
+	  contained in the package net-tools, the location and version number
+	  of which are given in <file:Documentation/Changes>.
+
+	  For a general introduction to Linux networking, it is highly
+	  recommended to read the NET-HOWTO, available from
+	  <http://www.tldp.org/docs.html#howto>.
+
+# Make sure that all config symbols are dependent on NET
+if NET
+
+menu "Networking options"
+
+source "net/packet/Kconfig"
+source "net/unix/Kconfig"
+
+config INET
+	bool "TCP/IP networking"
+	---help---
+	  These are the protocols used on the Internet and on most local
+	  Ethernets. It is highly recommended to say Y here (this will enlarge
+	  your kernel by about 144 KB), since some programs (e.g. the X window
+	  system) use TCP/IP even if your machine is not connected to any
+	  other computer. You will get the so-called loopback device which
+	  allows you to ping yourself (great fun, that!).
+
+	  For an excellent introduction to Linux networking, please read the
+	  Linux Networking HOWTO, available from
+	  <http://www.tldp.org/docs.html#howto>.
+
+	  If you say Y here and also to "/proc file system support" and
+	  "Sysctl support" below, you can change various aspects of the
+	  behavior of the TCP/IP code by writing to the (virtual) files in
+	  /proc/sys/net/ipv4/*; the options are explained in the file
+	  <file:Documentation/networking/ip-sysctl.txt>.
+
+	  Short answer: say Y.
+
+if INET
+source "net/ipv4/Kconfig"
+source "net/ipv6/Kconfig"
+
+endif # if INET
+
+config NET_DIVERT
+	bool "Frame Diverter (EXPERIMENTAL)"
+	depends on EXPERIMENTAL
+	---help---
+	  The Frame Diverter allows you to divert packets from the
+	  network, that are not aimed at the interface receiving it (in
+	  promisc. mode). Typically, a Linux box setup as an Ethernet bridge
+	  with the Frames Diverter on, can do some *really* transparent www
+	  caching using a Squid proxy for example.
+
+	  This is very useful when you don't want to change your router's
+	  config (or if you simply don't have access to it).
+
+	  The other possible usages of diverting Ethernet Frames are
+	  numberous:
+	  - reroute smtp traffic to another interface
+	  - traffic-shape certain network streams
+	  - transparently proxy smtp connections
+	  - etc...
+
+	  For more informations, please refer to:
+	  <http://diverter.sourceforge.net/>
+	  <http://perso.wanadoo.fr/magpie/EtherDivert.html>
+
+	  If unsure, say N.
+
+source "net/sched/Kconfig"
+
+menu "Network testing"
+
+config NET_PKTGEN
+	tristate "Packet Generator (USE WITH CAUTION)"
+	depends on PROC_FS
+	---help---
+	  This module will inject preconfigured packets, at a configurable
+	  rate, out of a given interface.  It is used for network interface
+	  stress testing and performance analysis.  If you don't understand
+	  what was just said, you don't need it: say N.
+
+	  Documentation on how to use the packet generator can be found
+	  at <file:Documentation/networking/pktgen.txt>.
+
+	  To compile this code as a module, choose M here: the
+	  module will be called pktgen.
+
+endmenu
+
+endmenu
+
+
+endif   # if NET
+endmenu # Networking
+

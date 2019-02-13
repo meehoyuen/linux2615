@@ -1,0 +1,111 @@
+#
+# Block device driver configuration
+#
+
+menu "Block devices"
+
+config BLK_DEV_FD
+	tristate "Normal floppy disk support"
+	depends on ARCH_MAY_HAVE_PC_FDC
+	---help---
+	  If you want to use the floppy disk drive(s) of your PC under Linux,
+	  say Y. Information about this driver, especially important for IBM
+	  Thinkpad users, is contained in <file:Documentation/floppy.txt>.
+	  That file also contains the location of the Floppy driver FAQ as
+	  well as location of the fdutils package used to configure additional
+	  parameters of the driver at run time.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called floppy.
+
+config BLK_DEV_LOOP
+	tristate "Loopback device support"
+	---help---
+	  Saying Y here will allow you to use a regular file as a block
+	  device; you can then create a file system on that block device and
+	  mount it just as you would mount other block devices such as hard
+	  drive partitions, CD-ROM drives or floppy drives. The loop devices
+	  are block special device files with major number 7 and typically
+	  called /dev/loop0, /dev/loop1 etc.
+
+	  This is useful if you want to check an ISO 9660 file system before
+	  burning the CD, or if you want to use floppy images without first
+	  writing them to floppy. Furthermore, some Linux distributions avoid
+	  the need for a dedicated Linux partition by keeping their complete
+	  root file system inside a DOS FAT file using this loop device
+	  driver.
+
+	  To use the loop device, you need the losetup utility, found in the
+	  util-linux package, see
+	  <ftp://ftp.kernel.org/pub/linux/utils/util-linux/>.
+
+	  The loop device driver can also be used to "hide" a file system in
+	  a disk partition, floppy, or regular file, either using encryption
+	  (scrambling the data) or steganography (hiding the data in the low
+	  bits of, say, a sound file). This is also safe if the file resides
+	  on a remote file server.
+
+	  There are several ways of encrypting disks. Some of these require
+	  kernel patches. The vanilla kernel offers the cryptoloop option
+	  and a Device Mapper target (which is superior, as it supports all
+	  file systems). If you want to use the cryptoloop, say Y to both
+	  LOOP and CRYPTOLOOP, and make sure you have a recent (version 2.12
+	  or later) version of util-linux. Additionally, be aware that
+	  the cryptoloop is not safe for storing journaled filesystems.
+
+	  Note that this loop device has nothing to do with the loopback
+	  device used for network connections from the machine to itself.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called loop.
+
+	  Most users will answer N here.
+
+config BLK_DEV_RAM
+	tristate "RAM disk support"
+	---help---
+	  Saying Y here will allow you to use a portion of your RAM memory as
+	  a block device, so that you can make file systems on it, read and
+	  write to it and do all the other things that you can do with normal
+	  block devices (such as hard drives). It is usually used to load and
+	  store a copy of a minimal root file system off of a floppy into RAM
+	  during the initial install of Linux.
+
+	  Note that the kernel command line option "ramdisk=XX" is now
+	  obsolete. For details, read <file:Documentation/ramdisk.txt>.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called rd.
+
+	  Most normal users won't need the RAM disk functionality, and can
+	  thus say N here.
+
+config BLK_DEV_RAM_COUNT
+	int "Default number of RAM disks" if BLK_DEV_RAM
+	default "16"
+	help
+	  The default value is 16 RAM disks. Change this if you know what
+	  are doing. If you boot from a filesystem that needs to be extracted
+	  in memory, you will need at least one RAM disk (e.g. root on cramfs).
+
+config BLK_DEV_RAM_SIZE
+	int "Default RAM disk size (kbytes)"
+	depends on BLK_DEV_RAM
+	default "4096"
+	help
+	  The default value is 4096 kilobytes. Only change this if you know
+	  what are you doing. If you are using IBM S/390, then set this to
+	  8192.
+
+config BLK_DEV_INITRD
+	bool "Initial RAM disk (initrd) support"
+	depends on BLK_DEV_RAM=y
+	help
+	  The initial RAM disk is a RAM disk that is loaded by the boot loader
+	  (loadlin or lilo) and that is mounted as root before the normal boot
+	  procedure. It is typically used to load modules needed to mount the
+	  "real" root file system, etc. See <file:Documentation/initrd.txt>
+	  for details.
+
+
+endmenu

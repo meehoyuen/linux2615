@@ -1,0 +1,227 @@
+#
+# IDE ATA ATAPI Block device driver configuration
+#
+# Andre Hedrick <andre@linux-ide.org>
+#
+
+menu "ATA/ATAPI/MFM/RLL support"
+
+config IDE
+	tristate "ATA/ATAPI/MFM/RLL support"
+	---help---
+	  If you say Y here, your kernel will be able to manage low cost mass
+	  storage units such as ATA/(E)IDE and ATAPI units. The most common
+	  cases are IDE hard drives and ATAPI CD-ROM drives.
+
+	  If your system is pure SCSI and doesn't use these interfaces, you
+	  can say N here.
+
+	  Integrated Disk Electronics (IDE aka ATA-1) is a connecting standard
+	  for mass storage units such as hard disks. It was designed by
+	  Western Digital and Compaq Computer in 1984. It was then named
+	  ST506. Quite a number of disks use the IDE interface.
+
+	  AT Attachment (ATA) is the superset of the IDE specifications.
+	  ST506 was also called ATA-1.
+
+	  Fast-IDE is ATA-2 (also named Fast ATA), Enhanced IDE (EIDE) is
+	  ATA-3. It provides support for larger disks (up to 8.4GB by means of
+	  the LBA standard), more disks (4 instead of 2) and for other mass
+	  storage units such as tapes and cdrom. UDMA/33 (aka UltraDMA/33) is
+	  ATA-4 and provides faster (and more CPU friendly) transfer modes
+	  than previous PIO (Programmed processor Input/Output) from previous
+	  ATA/IDE standards by means of fast DMA controllers.
+
+	  ATA Packet Interface (ATAPI) is a protocol used by EIDE tape and
+	  CD-ROM drives, similar in many respects to the SCSI protocol.
+
+	  SMART IDE (Self Monitoring, Analysis and Reporting Technology) was
+	  designed in order to prevent data corruption and disk crash by
+	  detecting pre hardware failure conditions (heat, access time, and
+	  the like...). Disks built since June 1995 may follow this standard.
+	  The kernel itself doesn't manage this; however there are quite a
+	  number of user programs such as smart that can query the status of
+	  SMART parameters from disk drives.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called ide.
+
+	  For further information, please read <file:Documentation/ide.txt>.
+
+	  If unsure, say Y.
+
+if IDE
+
+config IDE_MAX_HWIFS 
+	int "Max IDE interfaces"
+	depends on ALPHA || SUPERH
+	default 4
+	help
+	  This is the maximum number of IDE hardware interfaces that will
+	  be supported by the driver. Make sure it is at least as high as
+	  the number of IDE interfaces in your system.
+
+config BLK_DEV_IDE
+	tristate "Enhanced IDE/MFM/RLL disk/cdrom/tape/floppy support"
+	---help---
+	  If you say Y here, you will use the full-featured IDE driver to
+	  control up to ten ATA/IDE interfaces, each being able to serve a
+	  "master" and a "slave" device, for a total of up to twenty ATA/IDE
+	  disk/cdrom/tape/floppy drives.
+
+	  Useful information about large (>540 MB) IDE disks, multiple
+	  interfaces, what to do if ATA/IDE devices are not automatically
+	  detected, sound card ATA/IDE ports, module support, and other
+	  topics, is contained in <file:Documentation/ide.txt>. For detailed
+	  information about hard drives, consult the Disk-HOWTO and the
+	  Multi-Disk-HOWTO, available from
+	  <http://www.tldp.org/docs.html#howto>.
+
+	  To fine-tune ATA/IDE drive/interface parameters for improved
+	  performance, look for the hdparm package at
+	  <ftp://ibiblio.org/pub/Linux/system/hardware/>.
+
+	  To compile this driver as a module, choose M here and read
+	  <file:Documentation/ide.txt>. The module will be called ide-mod.
+	  Do not compile this driver as a module if your root file system (the
+	  one containing the directory /) is located on an IDE device.
+
+	  If you have one or more IDE drives, say Y or M here. If your system
+	  has no IDE drives, or if memory requirements are really tight, you
+	  could say N here, and select the "Old hard disk driver" below
+	  instead to save about 13 KB of memory in the kernel.
+
+if BLK_DEV_IDE
+
+comment "Please see Documentation/ide.txt for help/info on IDE drives"
+
+config BLK_DEV_IDEDISK
+	tristate "Include IDE/ATA-2 DISK support"
+	---help---
+	  This will include enhanced support for MFM/RLL/IDE hard disks.  If
+	  you have a MFM/RLL/IDE disk, and there is no special reason to use
+	  the old hard disk driver instead, say Y.  If you have an SCSI-only
+	  system, you can say N here.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called ide-disk.
+	  Do not compile this driver as a module if your root file system
+	  (the one containing the directory /) is located on the IDE disk.
+
+	  If unsure, say Y.
+
+config IDEDISK_MULTI_MODE
+	bool "Use multi-mode by default"
+	help
+	  If you get this error, try to say Y here:
+
+	  hda: set_multmode: status=0x51 { DriveReady SeekComplete Error }
+	  hda: set_multmode: error=0x04 { DriveStatusError }
+
+	  If in doubt, say N.
+
+config BLK_DEV_IDECD
+	tristate "Include IDE/ATAPI CDROM support"
+	---help---
+	  If you have a CD-ROM drive using the ATAPI protocol, say Y. ATAPI is
+	  a newer protocol used by IDE CD-ROM and TAPE drives, similar to the
+	  SCSI protocol. Most new CD-ROM drives use ATAPI, including the
+	  NEC-260, Mitsumi FX400, Sony 55E, and just about all non-SCSI
+	  double(2X) or better speed drives.
+
+	  If you say Y here, the CD-ROM drive will be identified at boot time
+	  along with other IDE devices, as "hdb" or "hdc", or something
+	  similar (check the boot messages with dmesg). If this is your only
+	  CD-ROM drive, you can say N to all other CD-ROM options, but be sure
+	  to say Y or M to "ISO 9660 CD-ROM file system support".
+
+	  Note that older versions of LILO (LInux LOader) cannot properly deal
+	  with IDE/ATAPI CD-ROMs, so install LILO 16 or higher, available from
+	  <http://lilo.go.dyndns.org/>.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called ide-cd.
+
+comment "IDE chipset support/bugfixes"
+
+config IDE_GENERIC
+	tristate "generic/default IDE chipset support"
+	default y
+	help
+	  If unsure, say Y.
+
+config BLK_DEV_IDEPCI
+	bool "PCI IDE chipset support" if PCI
+	default BLK_DEV_IDEDMA_PMAC if PPC_PMAC && BLK_DEV_IDEDMA_PMAC
+	help
+	  Say Y here for PCI systems which use IDE drive(s).
+	  This option helps the IDE driver to automatically detect and
+	  configure all PCI-based IDE interfaces in your system.
+
+config BLK_DEV_IDEDMA_PCI
+	bool "Generic PCI bus-master DMA support"
+	depends on PCI && BLK_DEV_IDEPCI
+	---help---
+	  If your PCI system uses IDE drive(s) (as opposed to SCSI, say) and
+	  is capable of bus-master DMA operation (most Pentium PCI systems),
+	  you will want to say Y here to reduce CPU overhead. You can then use
+	  the "hdparm" utility to enable DMA for drives for which it was not
+	  enabled automatically. By default, DMA is not enabled automatically
+	  for these drives, but you can change that by saying Y to the
+	  following question "Use DMA by default when available". You can get
+	  the latest version of the hdparm utility from
+	  <ftp://ibiblio.org/pub/Linux/system/hardware/>.
+
+	  Read the comments at the beginning of <file:drivers/ide/ide-dma.c>
+	  and the file <file:Documentation/ide.txt> for more information.
+
+	  It is safe to say Y to this question.
+
+if BLK_DEV_IDEDMA_PCI
+
+config IDEDMA_PCI_AUTO
+	bool "Use PCI DMA by default when available"
+	---help---
+	  Prior to kernel version 2.1.112, Linux used to automatically use
+	  DMA for IDE drives and chipsets which support it. Due to concerns
+	  about a couple of cases where buggy hardware may have caused damage,
+	  the default is now to NOT use DMA automatically. To revert to the
+	  previous behaviour, say Y to this question.
+
+	  If you suspect your hardware is at all flakey, say N here.
+	  Do NOT email the IDE kernel people regarding this issue!
+
+	  It is normally safe to answer Y to this question unless your
+	  motherboard uses a VIA VP2 chipset, in which case you should say N.
+
+config BLK_DEV_AMD74XX
+	tristate "AMD and nVidia IDE support"
+	help
+	  This driver adds explicit support for AMD-7xx and AMD-8111 chips
+	  and also for the nVidia nForce chip.  This allows the kernel to
+	  change PIO, DMA and UDMA speeds and to configure the chip to
+	  optimum performance.
+
+config BLK_DEV_PIIX
+	tristate "Intel PIIXn chipsets support"
+	help
+	  This driver adds explicit support for Intel PIIX and ICH chips
+	  and also for the Efar Victory66 (slc90e66) chip.  This allows
+	  the kernel to change PIO, DMA and UDMA speeds and to configure
+	  the chip to optimum performance.
+
+config BLK_DEV_PDC202XX_NEW
+	tristate "PROMISE PDC202{68|69|70|71|75|76|77} support"
+
+endif
+config BLK_DEV_IDEDMA
+	def_bool BLK_DEV_IDEDMA_PCI || BLK_DEV_IDEDMA_PMAC || BLK_DEV_IDEDMA_ICS || BLK_DEV_IDE_AU1XXX_MDMA2_DBDMA
+
+config IDEDMA_AUTO
+	def_bool IDEDMA_PCI_AUTO || IDEDMA_ICS_AUTO
+
+endif
+
+endif
+
+endmenu

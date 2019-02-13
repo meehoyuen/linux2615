@@ -1,0 +1,8 @@
+#
+# Security configuration
+#
+
+menu "Security options"
+
+endmenu
+

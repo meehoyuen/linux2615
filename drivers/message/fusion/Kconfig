@@ -1,0 +1,34 @@
+
+menu "Fusion MPT device support"
+
+config FUSION
+	bool
+	default n
+
+config FUSION_SPI
+	tristate "Fusion MPT ScsiHost drivers for SPI"
+	depends on PCI && SCSI
+	select FUSION
+	---help---
+	  SCSI HOST support for a parallel SCSI host adapters.
+
+	  List of supported controllers:
+
+	  LSI53C1020
+	  LSI53C1020A
+	  LSI53C1030
+	  LSI53C1035
+
+config FUSION_MAX_SGE
+	int "Maximum number of scatter gather entries (16 - 128)"
+	depends on FUSION
+	default "128"
+	range 16 128
+	help
+	  This option allows you to specify the maximum number of scatter-
+	  gather entries per I/O. The driver default is 128, which matches
+	  SCSI_MAX_PHYS_SEGMENTS. However, it may decreased down to 16.
+	  Decreasing this parameter will reduce memory requirements
+	  on a per controller instance.
+
+endmenu

@@ -1,0 +1,35 @@
+#
+# USB Input driver configuration
+#
+comment "USB Input Devices"
+	depends on USB
+
+config USB_HID
+	tristate "USB Human Interface Device (full HID) support"
+	depends on USB
+	---help---
+	  Say Y here if you want full HID support to connect keyboards,
+	  mice, joysticks, graphic tablets, or any other HID based devices
+	  to your computer via USB. You also need to select HID Input layer
+	  support (below) if you want to use keyboards, mice, joysticks and
+	  the like ... as well as Uninterruptible Power Supply (UPS) and
+	  monitor control devices.
+
+	  You can't use this driver and the HIDBP (Boot Protocol) keyboard
+	  and mouse drivers at the same time. More information is available:
+	  <file:Documentation/input/input.txt>.
+
+	  If unsure, say Y.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called usbhid.
+
+config USB_HIDINPUT
+	bool "HID input layer support"
+	default y
+	depends on INPUT && USB_HID
+	help
+	  Say Y here if you want to use a USB keyboard, mouse or joystick,
+	  or any other HID input device.
+
+	  If unsure, say Y.

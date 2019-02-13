@@ -1,0 +1,63 @@
+#
+# Native language support configuration
+#
+
+menu "Native Language Support"
+
+config NLS
+	tristate "Base native language support"
+	---help---
+	  The base Native Language Support. A number of filesystems
+	  depend on it (e.g. FAT, JOLIET, NT, BEOS filesystems), as well
+	  as the ability of some filesystems to use native languages
+	  (NCP, SMB).
+
+	  If unsure, say Y.
+
+	  To compile this code as a module, choose M here: the module
+	  will be called nls_base.
+
+config NLS_DEFAULT
+	string "Default NLS Option"
+	depends on NLS
+	default "iso8859-1"
+	---help---
+	  The default NLS used when mounting file system. Note, that this is
+	  the NLS used by your console, not the NLS used by a specific file
+	  system (if different) to store data (filenames) on a disk.
+
+	  If unsure, specify it as "iso8859-1".
+
+config NLS_ASCII
+	tristate "ASCII (United States)"
+	depends on NLS
+	help
+	  An ASCII NLS module is needed if you want to override the
+	  DEFAULT NLS with this very basic charset and don't want any
+	  non-ASCII characters to be translated.
+
+config NLS_ISO8859_1
+	tristate "NLS ISO 8859-1  (Latin 1; Western European Languages)"
+	depends on NLS
+	help
+	  If you want to display filenames with native language characters
+	  from the Microsoft FAT file system family or from JOLIET CD-ROMs
+	  correctly on the screen, you need to include the appropriate
+	  input/output character sets. Say Y here for the Latin 1 character
+	  set, which covers most West European languages such as Albanian,
+	  Catalan, Danish, Dutch, English, Faeroese, Finnish, French, German,
+	  Galician, Irish, Icelandic, Italian, Norwegian, Portuguese, Spanish,
+	  and Swedish. It is also the default for the US. If unsure, say Y.
+
+config NLS_UTF8
+	tristate "NLS UTF8"
+	depends on NLS
+	help
+	  If you want to display filenames with native language characters
+	  from the Microsoft FAT file system family or from JOLIET CD-ROMs
+	  correctly on the screen, you need to include the appropriate
+	  input/output character sets. Say Y here for the UTF-8 encoding of
+	  the Unicode/ISO9646 universal character set.
+
+endmenu
+

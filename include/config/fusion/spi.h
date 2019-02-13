@@ -1,0 +1,1 @@
+#define CONFIG_FUSION_SPI 1
