@@ -36,7 +36,7 @@ CFLAGS += -mcmodel=kernel
 CFLAGS += -pipe
 # this makes reading assembly source easier, but produces worse code
 # actually it makes the kernel smaller too.
-CFLAGS += -fno-reorder-blocks	
+CFLAGS += -fno-reorder-blocks
 CFLAGS += -Wno-sign-compare
 ifneq ($(CONFIG_DEBUG_INFO),y)
 CFLAGS += -fno-asynchronous-unwind-tables
@@ -59,7 +59,7 @@ core-y					+= arch/x86_64/kernel/ \
 core-$(CONFIG_IA32_EMULATION)		+= arch/x86_64/ia32/
 drivers-$(CONFIG_PCI)			+= arch/x86_64/pci/
 drivers-$(CONFIG_OPROFILE)		+= arch/x86_64/oprofile/
-
+core-$(CONFIG_KVM) += arch/x86_64/kvm/
 boot := arch/x86_64/boot
 
 .PHONY: bzImage bzlilo install archmrproper \
