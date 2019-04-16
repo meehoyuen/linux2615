@@ -9,16 +9,15 @@
 #include <linux/types.h>
 #include <linux/hardirq.h>
 #include <linux/list.h>
-#include <linux/mutex.h>
 #include <linux/spinlock.h>
 #include <linux/signal.h>
 #include <linux/sched.h>
 #include <linux/mm.h>
 #include <linux/preempt.h>
-#include <linux/marker.h>
-#include <linux/msi.h>
+//#include <linux/marker.h>
+//#include <linux/msi.h>
 #include <asm/signal.h>
-
+#include <asm/semaphore.h> //=>#include <linux/mutex.h>
 #include <linux/kvm.h>
 #include <linux/kvm_para.h>
 
@@ -69,7 +68,7 @@ struct kvm_vcpu {
 	struct preempt_notifier preempt_notifier;
 #endif
 	int vcpu_id;
-	struct mutex mutex;
+	struct semaphore mutex;
 	int   cpu;
 	struct kvm_run *run;
 	int guest_mode;
@@ -117,13 +116,13 @@ struct kvm_kernel_irq_routing_entry {
 			unsigned irqchip;
 			unsigned pin;
 		} irqchip;
-		struct msi_msg msi;
+		//struct msi_msg msi;
 	};
 	struct list_head link;
 };
 
 struct kvm {
-	struct mutex lock; /* protects the vcpus array and APIC accesses */
+	struct semaphore lock; /* protects the vcpus array and APIC accesses */
 	spinlock_t mmu_lock;
 	struct rw_semaphore slots_lock;
 	struct mm_struct *mm; /* userspace tied to this vm */
@@ -148,7 +147,7 @@ struct kvm {
 #endif
 
 #ifdef KVM_ARCH_WANT_MMU_NOTIFIER
-	struct mmu_notifier mmu_notifier;
+	//struct mmu_notifier mmu_notifier;
 	unsigned long mmu_notifier_seq;
 	long mmu_notifier_count;
 #endif
@@ -403,13 +402,13 @@ static inline int kvm_deassign_device(struct kvm *kvm,
 static inline void kvm_guest_enter(void)
 {
 	account_system_vtime(current);
-	current->flags |= PF_VCPU;
+	//current->flags |= PF_VCPU;
 }
 
 static inline void kvm_guest_exit(void)
 {
 	account_system_vtime(current);
-	current->flags &= ~PF_VCPU;
+	//current->flags &= ~PF_VCPU;
 }
 
 static inline int memslot_id(struct kvm *kvm, struct kvm_memory_slot *slot)
