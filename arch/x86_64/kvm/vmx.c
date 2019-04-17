@@ -31,6 +31,7 @@
 #include <asm/io.h>
 #include <asm/desc.h>
 #include <asm/vmx.h>
+#include <asm/asm.h>
 #include <asm/virtext.h>
 
 #define __ex(x) __kvm_handle_fault_on_reboot(x)
@@ -95,7 +96,7 @@ struct vcpu_vmx {
 
 	/* Support for vnmi-less CPUs */
 	int soft_vnmi_blocked;
-	ktime_t entry_time;
+	//ktime_t entry_time;
 	s64 vnmi_blocked_time;
 };
 
@@ -362,6 +363,7 @@ static void vcpu_clear(struct vcpu_vmx *vmx)
 {
 	if (vmx->vcpu.cpu == -1)
 		return;
+
 	smp_call_function_single(vmx->vcpu.cpu, __vcpu_clear, vmx, 1);
 }
 
@@ -3268,8 +3270,7 @@ static void vmx_complete_interrupts(struct vcpu_vmx *vmx)
 			vmcs_set_bits(GUEST_INTERRUPTIBILITY_INFO,
 				      GUEST_INTR_STATE_NMI);
 	} else if (unlikely(vmx->soft_vnmi_blocked))
-		vmx->vnmi_blocked_time +=
-			ktime_to_ns(ktime_sub(ktime_get(), vmx->entry_time));
+		vmx->vnmi_blocked_time += 1000000;//ktime_to_ns(ktime_sub(ktime_get(), vmx->entry_time));
 
 	idt_vectoring_info = vmx->idt_vectoring_info;
 	idtv_info_valid = idt_vectoring_info & VECTORING_INFO_VALID_MASK;
@@ -3385,7 +3386,7 @@ static void vmx_vcpu_run(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
 
 	/* Record the guest's net vcpu time for enforced NMI injections. */
 	if (unlikely(!cpu_has_virtual_nmis() && vmx->soft_vnmi_blocked))
-		vmx->entry_time = ktime_get();
+		;//vmx->entry_time = ktime_get();
 
 	/* Handle invalid guest state instead of entering VMX */
 	if (vmx->emulation_required && emulate_invalid_guest_state) {

@@ -116,19 +116,47 @@ extern unsigned int init_intel_cacheinfo(struct cpuinfo_x86 *c);
 #define X86_EFLAGS_ID	0x00200000 /* CPUID detection flag */
 
 /*
+ * Basic CPU control in CR0
+ */
+#define X86_CR0_PE	0x00000001 /* Protection Enable */
+#define X86_CR0_MP	0x00000002 /* Monitor Coprocessor */
+#define X86_CR0_EM	0x00000004 /* Emulation */
+#define X86_CR0_TS	0x00000008 /* Task Switched */
+#define X86_CR0_ET	0x00000010 /* Extension Type */
+#define X86_CR0_NE	0x00000020 /* Numeric Error */
+#define X86_CR0_WP	0x00010000 /* Write Protect */
+#define X86_CR0_AM	0x00040000 /* Alignment Mask */
+#define X86_CR0_NW	0x20000000 /* Not Write-through */
+#define X86_CR0_CD	0x40000000 /* Cache Disable */
+#define X86_CR0_PG	0x80000000 /* Paging */
+
+/*
+ * Paging options in CR3
+ */
+#define X86_CR3_PWT	0x00000008 /* Page Write Through */
+#define X86_CR3_PCD	0x00000010 /* Page Cache Disable */
+
+/*
  * Intel CPU features in CR4
  */
-#define X86_CR4_VME		0x0001	/* enable vm86 extensions */
-#define X86_CR4_PVI		0x0002	/* virtual interrupts flag enable */
-#define X86_CR4_TSD		0x0004	/* disable time stamp at ipl 3 */
-#define X86_CR4_DE		0x0008	/* enable debugging extensions */
-#define X86_CR4_PSE		0x0010	/* enable page size extensions */
-#define X86_CR4_PAE		0x0020	/* enable physical address extensions */
-#define X86_CR4_MCE		0x0040	/* Machine check enable */
-#define X86_CR4_PGE		0x0080	/* enable global pages */
-#define X86_CR4_PCE		0x0100	/* enable performance counters at ipl 3 */
-#define X86_CR4_OSFXSR		0x0200	/* enable fast FPU save and restore */
-#define X86_CR4_OSXMMEXCPT	0x0400	/* enable unmasked SSE exceptions */
+#define X86_CR4_VME	0x00000001 /* enable vm86 extensions */
+#define X86_CR4_PVI	0x00000002 /* virtual interrupts flag enable */
+#define X86_CR4_TSD	0x00000004 /* disable time stamp at ipl 3 */
+#define X86_CR4_DE	0x00000008 /* enable debugging extensions */
+#define X86_CR4_PSE	0x00000010 /* enable page size extensions */
+#define X86_CR4_PAE	0x00000020 /* enable physical address extensions */
+#define X86_CR4_MCE	0x00000040 /* Machine check enable */
+#define X86_CR4_PGE	0x00000080 /* enable global pages */
+#define X86_CR4_PCE	0x00000100 /* enable performance counters at ipl 3 */
+#define X86_CR4_OSFXSR	0x00000200 /* enable fast FPU save and restore */
+#define X86_CR4_OSXMMEXCPT 0x00000400 /* enable unmasked SSE exceptions */
+#define X86_CR4_VMXE	0x00002000 /* enable VMX virtualization */
+#define X86_CR4_OSXSAVE 0x00040000 /* enable xsave and xrestore */
+
+/*
+ * x86-64 Task Priority Register, CR8
+ */
+#define X86_CR8_TPR	0x0000000F /* task priority register */
 
 /*
  * Save the cr4 feature set we're using (ie
@@ -421,18 +449,21 @@ static inline void prefetchw(void *x)
 /*
  *      NSC/Cyrix CPU configuration register indexes
  */
-#define CX86_CCR0 0xc0
-#define CX86_CCR1 0xc1
-#define CX86_CCR2 0xc2
-#define CX86_CCR3 0xc3
-#define CX86_CCR4 0xe8
-#define CX86_CCR5 0xe9
-#define CX86_CCR6 0xea
-#define CX86_CCR7 0xeb
-#define CX86_DIR0 0xfe
-#define CX86_DIR1 0xff
-#define CX86_ARR_BASE 0xc4
-#define CX86_RCR_BASE 0xdc
+#define CX86_PCR0	0x20
+#define CX86_GCR	0xb8
+#define CX86_CCR0	0xc0
+#define CX86_CCR1	0xc1
+#define CX86_CCR2	0xc2
+#define CX86_CCR3	0xc3
+#define CX86_CCR4	0xe8
+#define CX86_CCR5	0xe9
+#define CX86_CCR6	0xea
+#define CX86_CCR7	0xeb
+#define CX86_PCR1	0xf0
+#define CX86_DIR0	0xfe
+#define CX86_DIR1	0xff
+#define CX86_ARR_BASE	0xc4
+#define CX86_RCR_BASE	0xdc
 
 /*
  *      NSC/Cyrix CPU indexed register access macros
@@ -479,5 +510,13 @@ static inline void __mwait(unsigned long eax, unsigned long ecx)
 extern unsigned long boot_option_idle_override;
 /* Boot loader type from the setup header */
 extern int bootloader_type;
+
+#ifdef __KERNEL__
+#ifdef CONFIG_VM86
+#define X86_VM_MASK	X86_EFLAGS_VM
+#else
+#define X86_VM_MASK	0 /* No VM86 support */
+#endif
+#endif
 
 #endif /* __ASM_X86_64_PROCESSOR_H */

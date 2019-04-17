@@ -12,7 +12,7 @@ struct kvm_lapic {
 		atomic_t pending;
 		s64 period;	/* unit: ns */
 		u32 divide_count;
-		struct hrtimer dev;
+		//struct hrtimer dev;
 	} timer;
 	struct kvm_vcpu *vcpu;
 	struct page *regs_page;

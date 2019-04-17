@@ -1,7 +1,7 @@
 /*
  * Automatically generated C config: don't edit
  * Linux kernel version: 2.6.15.7-ubuntu1
- * Wed Feb 13 22:03:02 2019
+ * Tue Apr 16 23:23:29 2019
  */
 #define AUTOCONF_INCLUDED
 #define CONFIG_X86_64 1
@@ -601,6 +601,10 @@
 #undef CONFIG_FRAME_POINTER
 #define CONFIG_INIT_DEBUG 1
 #undef CONFIG_IOMMU_DEBUG
+#define CONFIG_HAVE_KVM_IRQCHIP 1
+#define CONFIG_VIRTUALIZATION 1
+#define CONFIG_KVM 1
+#define CONFIG_KVM_INTEL 1
 
 /*
  * Security options
