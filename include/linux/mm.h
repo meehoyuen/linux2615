@@ -993,5 +993,18 @@ int in_gate_area_no_task(unsigned long addr);
 /* /proc/<pid>/oom_adj set to -17 protects from the oom-killer */
 #define OOM_DISABLE -17
 
+#define pgoff_t unsigned long
+struct vm_fault {
+	unsigned int flags;		/* FAULT_FLAG_xxx flags */
+	pgoff_t pgoff;			/* Logical page offset based on vma */
+	void __user *virtual_address;	/* Faulting virtual address */
+
+	struct page *page;		/* ->fault handlers should return a
+					 * page here, unless VM_FAULT_NOPAGE
+					 * is set (which is also implied by
+					 * VM_FAULT_ERROR).
+					 */
+};
+
 #endif /* __KERNEL__ */
 #endif /* _LINUX_MM_H */

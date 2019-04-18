@@ -364,7 +364,7 @@ static void vcpu_clear(struct vcpu_vmx *vmx)
 	if (vmx->vcpu.cpu == -1)
 		return;
 
-	smp_call_function_single(vmx->vcpu.cpu, __vcpu_clear, vmx, 1);
+	smp_call_function_single(vmx->vcpu.cpu, __vcpu_clear, vmx, 0/*not used*/, 1);
 }
 
 static inline void vpid_sync_vcpu_all(struct vcpu_vmx *vmx)
@@ -2633,8 +2633,7 @@ static int handle_exception(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
 		if (vm_need_ept())
 			BUG();
 		cr2 = vmcs_readl(EXIT_QUALIFICATION);
-		KVMTRACE_3D(PAGE_FAULT, vcpu, error_code, (u32)cr2,
-			    (u32)((u64)cr2 >> 32), handler);
+		KVMTRACE_3D(PAGE_FAULT, vcpu, error_code, (u32)cr2, (u32)((u64)cr2 >> 32), handler);
 		if (vcpu->arch.interrupt.pending || vcpu->arch.exception.pending)
 			kvm_mmu_unprotect_page_virt(vcpu, cr2);
 		return kvm_mmu_page_fault(vcpu, cr2, error_code);

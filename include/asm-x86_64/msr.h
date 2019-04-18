@@ -146,10 +146,6 @@ static inline unsigned int cpuid_edx(unsigned int op)
 	return edx;
 }
 
-#define MSR_IA32_UCODE_WRITE		0x79
-#define MSR_IA32_UCODE_REV		0x8b
-
-
 #endif
 /* x86-64 specific MSRs */
 #define MSR_EFER		0xc0000080 /* extended feature register */
@@ -177,9 +173,6 @@ static inline unsigned int cpuid_edx(unsigned int op)
 #define EFER_FFXSR		(1<<_EFER_FFXSR)
 
 /* Intel MSRs. Some also available on other CPUs */
-#define MSR_IA32_TSC		0x10
-#define MSR_IA32_PLATFORM_ID	0x17
-
 #define MSR_IA32_PERFCTR0		0x000000c1
 #define MSR_IA32_PERFCTR1		0x000000c2
 #define MSR_FSB_FREQ			0x000000cd
@@ -399,9 +392,6 @@ static inline unsigned int cpuid_edx(unsigned int op)
 #define MSR_IA32_MCG_EIP		0x00000189
 #define MSR_IA32_MCG_RESERVED		0x0000018a
 
-#define MSR_P6_EVNTSEL0			0x186
-#define MSR_P6_EVNTSEL1			0x187
-
 #define MSR_IA32_PERF_STATUS		0x00000198
 #define MSR_IA32_PERF_CTL		0x00000199
 
@@ -412,17 +402,6 @@ static inline unsigned int cpuid_edx(unsigned int op)
 #define MSR_IA32_THERM_INTERRUPT	0x0000019b
 #define MSR_IA32_THERM_STATUS		0x0000019c
 #define MSR_IA32_MISC_ENABLE		0x000001a0
-
-#define MSR_IA32_DEBUGCTLMSR		0x1d9
-#define MSR_IA32_LASTBRANCHFROMIP	0x1db
-#define MSR_IA32_LASTBRANCHTOIP		0x1dc
-#define MSR_IA32_LASTINTFROMIP		0x1dd
-#define MSR_IA32_LASTINTTOIP		0x1de
-
-#define MSR_IA32_MC0_CTL		0x400
-#define MSR_IA32_MC0_STATUS		0x401
-#define MSR_IA32_MC0_ADDR		0x402
-#define MSR_IA32_MC0_MISC		0x403
 
 /* Pentium IV performance counter MSRs */
 #define MSR_P4_BPU_PERFCTR0		0x00000300

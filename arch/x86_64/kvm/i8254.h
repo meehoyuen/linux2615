@@ -4,7 +4,7 @@
 #include "iodev.h"
 
 struct kvm_kpit_timer {
-	struct hrtimer timer;
+	//struct hrtimer timer;
 	int irq;
 	s64 period; /* unit: ns */
 	s64 scheduled;
@@ -25,14 +25,14 @@ struct kvm_kpit_channel_state {
 	u8 mode;
 	u8 bcd; /* not supported */
 	u8 gate; /* timer start */
-	ktime_t count_load_time;
+	//ktime_t count_load_time;
 };
 
 struct kvm_kpit_state {
 	struct kvm_kpit_channel_state channels[3];
 	struct kvm_kpit_timer pit_timer;
 	u32    speaker_data_on;
-	struct mutex lock;
+	struct semaphore lock;
 	struct kvm_pit *pit;
 	spinlock_t inject_lock;
 	unsigned long irq_ack;

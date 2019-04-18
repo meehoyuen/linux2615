@@ -26,7 +26,7 @@
 #include "kvm_cache_regs.h"
 #include "x86.h"
 
-#include <linux/clocksource.h>
+//#include <linux/clocksource.h>
 #include <linux/interrupt.h>
 #include <linux/kvm.h>
 #include <linux/fs.h>
@@ -34,8 +34,8 @@
 #include <linux/module.h>
 #include <linux/mman.h>
 #include <linux/highmem.h>
-#include <linux/iommu.h>
-#include <linux/intel-iommu.h>
+//#include <linux/iommu.h>
+//#include <linux/intel-iommu.h>
 #include <linux/cpufreq.h>
 
 #include <asm/uaccess.h>
@@ -501,17 +501,6 @@ static void set_efer(struct kvm_vcpu *vcpu, u64 efer)
 		feat = kvm_find_cpuid_entry(vcpu, 0x80000001, 0);
 		if (!feat || !(feat->edx & bit(X86_FEATURE_FXSR_OPT))) {
 			printk(KERN_DEBUG "set_efer: #GP, enable FFXSR w/o CPUID capability\n");
-			kvm_inject_gp(vcpu, 0);
-			return;
-		}
-	}
-
-	if (efer & EFER_SVME) {
-		struct kvm_cpuid_entry2 *feat;
-
-		feat = kvm_find_cpuid_entry(vcpu, 0x80000001, 0);
-		if (!feat || !(feat->ecx & bit(X86_FEATURE_SVM))) {
-			printk(KERN_DEBUG "set_efer: #GP, enable SVM w/o SVM\n");
 			kvm_inject_gp(vcpu, 0);
 			return;
 		}
@@ -2720,7 +2709,7 @@ static int kvmclock_cpufreq_notifier(struct notifier_block *nb, unsigned long va
 		 * guest context is entered kvmclock will be updated,
 		 * so the guest will not see stale values.
 		 */
-		smp_call_function_single(freq->cpu, bounce_off, NULL, 1);
+		smp_call_function_single(freq->cpu, bounce_off, NULL, 0, 1);
 	}
 	return 0;
 }
@@ -2762,7 +2751,7 @@ int kvm_arch_init(void *opaque)
 	kvm_mmu_set_base_ptes(PT_PRESENT_MASK);
 	kvm_mmu_set_mask_ptes(PT_USER_MASK, PT_ACCESSED_MASK,
 			PT_DIRTY_MASK, PT64_NX_MASK, 0, 0);
-
+#if 0//comment temp
 	for_each_possible_cpu(cpu)
 		per_cpu(cpu_tsc_khz, cpu) = tsc_khz;
 	if (!boot_cpu_has(X86_FEATURE_CONSTANT_TSC)) {
@@ -2770,7 +2759,7 @@ int kvm_arch_init(void *opaque)
 		cpufreq_register_notifier(&kvmclock_cpufreq_notifier_block,
 					  CPUFREQ_TRANSITION_NOTIFIER);
 	}
-
+#endif
 	return 0;
 
 out:
@@ -3215,10 +3204,10 @@ static int vcpu_enter_guest(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
 	/*
 	 * Profile KVM exit RIPs:
 	 */
-	if (unlikely(prof_on == KVM_PROFILING)) {
+/* 	if (unlikely(prof_on == KVM_PROFILING)) {
 		unsigned long rip = kvm_rip_read(vcpu);
 		profile_hit(KVM_PROFILING, (void *)rip);
-	}
+	} */
 
 	if (vcpu->arch.exception.pending && kvm_x86_ops->exception_injected(vcpu))
 		vcpu->arch.exception.pending = false;
@@ -3316,7 +3305,7 @@ int kvm_arch_vcpu_ioctl_run(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
 		if (r)
 			goto out;
 	}
-#if CONFIG_HAS_IOMEM
+
 	if (vcpu->mmio_needed) {
 		memcpy(vcpu->mmio_data, kvm_run->mmio.data, 8);
 		vcpu->mmio_read_completed = 1;
@@ -3335,7 +3324,7 @@ int kvm_arch_vcpu_ioctl_run(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
 			goto out;
 		}
 	}
-#endif
+
 	if (kvm_run->exit_reason == KVM_EXIT_HYPERCALL)
 		kvm_register_write(vcpu, VCPU_REGS_RAX,
 				     kvm_run->hypercall.ret);
@@ -4456,6 +4445,6 @@ void kvm_vcpu_kick(struct kvm_vcpu *vcpu)
 	 * So need not to call smp_call_function_single() in that case.
 	 */
 	if (vcpu->guest_mode && vcpu->cpu != cpu)
-		smp_call_function_single(ipi_pcpu, vcpu_kick_intr, vcpu, 0);
+		smp_call_function_single(ipi_pcpu, vcpu_kick_intr, vcpu, 0, 0);
 	put_cpu();
 }

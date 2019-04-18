@@ -31,8 +31,8 @@
 #include <linux/mm.h>
 #include <linux/highmem.h>
 #include <linux/smp.h>
-#include <linux/hrtimer.h>
-#include <linux/io.h>
+//#include <linux/hrtimer.h>
+//#include <linux/io.h>
 #include <asm/processor.h>
 #include <asm/page.h>
 #include <asm/current.h>
