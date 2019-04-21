@@ -527,7 +527,7 @@ static inline int valid_vcpu(int n)
 inline int kvm_is_mmio_pfn(pfn_t pfn)
 {
     if (pfn_valid(pfn)) {
-		struct page *page = pfn_to_page(pfn);
+        struct page *page = pfn_to_page(pfn);
 
         //if (unlikely(PageTail(page)))
         //        page = page->first_page;
@@ -2246,6 +2246,8 @@ int kvm_init(void *opaque, unsigned int vcpu_size,
     int r;
     int cpu;
 
+    printk(KERN_ERR "kvm_init\n");
+
     kvm_init_debug();
 
     r = kvm_arch_init(opaque);
@@ -2308,6 +2310,8 @@ int kvm_init(void *opaque, unsigned int vcpu_size,
     msi2intx = 0;
 #endif
 
+    printk(KERN_ERR "kvm_init ok\n");
+
     return 0;
 
 out_free:
@@ -2329,6 +2333,7 @@ out:
     kvm_arch_exit();
     kvm_exit_debug();
 out_fail:
+    printk(KERN_ERR "kvm_init failed\n");
     return r;
 }
 EXPORT_SYMBOL_GPL(kvm_init);
