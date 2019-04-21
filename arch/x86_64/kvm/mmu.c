@@ -2804,7 +2804,6 @@ static void mmu_destroy_caches(void)
 void kvm_mmu_module_exit(void)
 {
 	mmu_destroy_caches();
-	unregister_shrinker(&mmu_shrinker);
 	remove_shrinker(&mmu_shrinker);
 }
 
@@ -2827,8 +2826,7 @@ int kvm_mmu_module_init(void)
 	if (!mmu_page_header_cache)
 		goto nomem;
 
-	register_shrinker(&mmu_shrinker);
-	set_shrinker(&mmu_shrinker);
+	set_shrinker(DEFAULT_SEEKS * 10, &mmu_shrinker);
 
 	return 0;
 
