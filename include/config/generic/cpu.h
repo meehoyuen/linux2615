@@ -1,1 +1,0 @@
-#define CONFIG_GENERIC_CPU 1

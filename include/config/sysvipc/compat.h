@@ -1,1 +1,0 @@
-#define CONFIG_SYSVIPC_COMPAT 1

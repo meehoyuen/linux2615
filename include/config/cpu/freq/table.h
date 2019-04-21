@@ -1,1 +1,0 @@
-#define CONFIG_CPU_FREQ_TABLE 1

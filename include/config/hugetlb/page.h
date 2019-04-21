@@ -1,1 +1,0 @@
-#define CONFIG_HUGETLB_PAGE 1

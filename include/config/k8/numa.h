@@ -1,1 +1,0 @@
-#define CONFIG_K8_NUMA 1

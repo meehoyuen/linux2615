@@ -1,1 +1,0 @@
-#define CONFIG_E1000 1

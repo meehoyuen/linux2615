@@ -1,1 +1,0 @@
-#define CONFIG_X86_POWERNOW_K8 1

@@ -1,1 +1,0 @@
-#define CONFIG_HPET_EMULATE_RTC 1

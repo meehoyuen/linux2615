@@ -1,1 +1,0 @@
-#define CONFIG_X86_64_ACPI_NUMA 1

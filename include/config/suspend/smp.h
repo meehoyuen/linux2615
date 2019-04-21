@@ -1,1 +1,0 @@
-#define CONFIG_SUSPEND_SMP 1
