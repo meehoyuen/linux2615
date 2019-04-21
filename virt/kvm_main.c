@@ -178,7 +178,7 @@ static void kvm_free_assigned_irq(struct kvm *kvm,
      * interrupt_work done.
      */
     disable_irq_nosync(assigned_dev->host_irq);
-    cancel_work_sync(&assigned_dev->interrupt_work);
+    //cancel_work_sync(&assigned_dev->interrupt_work);
 
     free_irq(assigned_dev->host_irq, (void *)assigned_dev);
 
@@ -195,7 +195,7 @@ static void kvm_free_assigned_device(struct kvm *kvm,
 {
     kvm_free_assigned_irq(kvm, assigned_dev);
 
-    pci_reset_function(assigned_dev->dev);
+    //pci_reset_function(assigned_dev->dev);
 
     pci_release_regions(assigned_dev->dev);
     pci_disable_device(assigned_dev->dev);
@@ -430,8 +430,7 @@ static int kvm_vm_ioctl_assign_device(struct kvm *kvm,
         r = -ENOMEM;
         goto out;
     }
-    dev = pci_get_bus_and_slot(assigned_dev->busnr,
-                   assigned_dev->devfn);
+    //dev = pci_get_bus_and_slot(assigned_dev->busnr, assigned_dev->devfn);
     if (!dev) {
         printk(KERN_INFO "%s: host device not found\n", __func__);
         r = -EINVAL;
@@ -449,7 +448,7 @@ static int kvm_vm_ioctl_assign_device(struct kvm *kvm,
         goto out_disable;
     }
 
-    pci_reset_function(dev);
+    //pci_reset_function(dev);
 
     match->assigned_dev_id = assigned_dev->assigned_dev_id;
     match->host_busnr = assigned_dev->busnr;
@@ -528,7 +527,11 @@ static inline int valid_vcpu(int n)
 inline int kvm_is_mmio_pfn(pfn_t pfn)
 {
     if (pfn_valid(pfn)) {
-        struct page *page = compound_head(pfn_to_page(pfn));
+		struct page *page = pfn_to_page(pfn);
+
+        //if (unlikely(PageTail(page)))
+        //        page = page->first_page;
+
         return PageReserved(page);
     }
 
@@ -1183,7 +1186,7 @@ pfn_t gfn_to_pfn(struct kvm *kvm, gfn_t gfn)
         return page_to_pfn(bad_page);
     }
 
-    npages = get_user_pages_fast(addr, 1, 1, page);
+    //npages = get_user_pages_fast(addr, 1, 1, page);
 
     if (unlikely(npages != 1)) {
         struct vm_area_struct *vma;
@@ -1336,9 +1339,9 @@ int kvm_read_guest_atomic(struct kvm *kvm, gpa_t gpa, void *data,
     addr = gfn_to_hva(kvm, gfn);
     if (kvm_is_error_hva(addr))
         return -EFAULT;
-    pagefault_disable();
+    //pagefault_disable();
     r = __copy_from_user_inatomic(data, (void __user *)addr + offset, len);
-    pagefault_enable();
+    //pagefault_enable();
     if (r)
         return -EFAULT;
     return 0;
@@ -1518,7 +1521,7 @@ static struct file_operations kvm_vcpu_fops = {
  */
 static int create_vcpu_fd(struct kvm_vcpu *vcpu)
 {
-    int fd = anon_inode_getfd("kvm-vcpu", &kvm_vcpu_fops, vcpu, 0);
+    int fd = -1;//anon_inode_getfd("kvm-vcpu", &kvm_vcpu_fops, vcpu, 0);
     if (fd < 0)
         kvm_put_kvm(vcpu->kvm);
     return fd;
@@ -1964,7 +1967,7 @@ static int kvm_dev_ioctl_create_vm(void)
     kvm = kvm_create_vm();
     if (IS_ERR(kvm))
         return PTR_ERR(kvm);
-    fd = anon_inode_getfd("kvm-vm", &kvm_vm_fops, kvm, 0);
+    fd = -1;//anon_inode_getfd("kvm-vm", &kvm_vm_fops, kvm, 0);
     if (fd < 0)
         kvm_put_kvm(kvm);
 

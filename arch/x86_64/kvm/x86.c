@@ -599,7 +599,7 @@ static void kvm_write_guest_time(struct kvm_vcpu *v)
     /* Keep irq disabled to prevent changes to the clock */
     local_irq_save(flags);
     //kvm_get_msr(v, MSR_IA32_TIME_STAMP_COUNTER, &vcpu->hv_clock.tsc_timestamp);
-    ktime_get_ts(&ts);
+    //ktime_get_ts(&ts);
     local_irq_restore(flags);
 
     /* With all the info we got, fill in the values */
@@ -996,7 +996,7 @@ int kvm_dev_ioctl_check_extension(long ext)
         r = !tdp_enabled;
         break;
     case KVM_CAP_IOMMU:
-        r = iommu_found();
+        r = 0;//iommu_found();
         break;
     default:
         r = 0;
@@ -1081,7 +1081,8 @@ static int is_efer_nx(void)
 {
     unsigned long long efer = 0;
 
-    rdmsrl_safe(MSR_EFER, &efer);
+    //rdmsrl_safe(MSR_EFER, &efer);
+	rdmsrl(MSR_EFER, efer);
     return efer & EFER_NX;
 }
 
@@ -3125,7 +3126,7 @@ static int vcpu_enter_guest(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
         get_debugreg(vcpu->arch.host_db[2], 2);
         get_debugreg(vcpu->arch.host_db[3], 3);
 
-        set_debugreg(0, 7);
+        set_debugreg(0L, 7);
         set_debugreg(vcpu->arch.eff_db[0], 0);
         set_debugreg(vcpu->arch.eff_db[1], 1);
         set_debugreg(vcpu->arch.eff_db[2], 2);
@@ -3136,7 +3137,7 @@ static int vcpu_enter_guest(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
     kvm_x86_ops->run(vcpu, kvm_run);
 
     if (unlikely(vcpu->arch.switch_db_regs)) {
-        set_debugreg(0, 7);
+        set_debugreg(0L, 7);
         set_debugreg(vcpu->arch.host_db[0], 0);
         set_debugreg(vcpu->arch.host_db[1], 1);
         set_debugreg(vcpu->arch.host_db[2], 2);

@@ -30,7 +30,7 @@
 #include <linux/compiler.h>
 
 #include <asm/page.h>
-#include <asm/cmpxchg.h>
+//#include <asm/cmpxchg.h>
 #include <asm/io.h>
 #include <asm/vmx.h>
 
@@ -279,7 +279,7 @@ static int mmu_topup_memory_cache(struct kvm_mmu_memory_cache *cache,
 	if (cache->nobjs >= min)
 		return 0;
 	while (cache->nobjs < ARRAY_SIZE(cache->objects)) {
-		obj = kmem_cache_zalloc(base_cache, GFP_KERNEL);
+		obj = kmem_cache_alloc(base_cache, GFP_KERNEL);
 		if (!obj)
 			return -ENOMEM;
 		cache->objects[cache->nobjs++] = obj;
@@ -2787,7 +2787,7 @@ static int mmu_shrink(int nr_to_scan, gfp_t gfp_mask)
 }
 
 static struct shrinker mmu_shrinker = {
-	.shrink = mmu_shrink,
+	.shrinker = mmu_shrink,
 	.seeks = DEFAULT_SEEKS * 10,
 };
 
@@ -2805,28 +2805,30 @@ void kvm_mmu_module_exit(void)
 {
 	mmu_destroy_caches();
 	unregister_shrinker(&mmu_shrinker);
+	remove_shrinker(&mmu_shrinker);
 }
 
 int kvm_mmu_module_init(void)
 {
 	pte_chain_cache = kmem_cache_create("kvm_pte_chain",
 					    sizeof(struct kvm_pte_chain),
-					    0, 0, NULL);
+					    0, 0, NULL, NULL);
 	if (!pte_chain_cache)
 		goto nomem;
 	rmap_desc_cache = kmem_cache_create("kvm_rmap_desc",
 					    sizeof(struct kvm_rmap_desc),
-					    0, 0, NULL);
+					    0, 0, NULL, NULL);
 	if (!rmap_desc_cache)
 		goto nomem;
 
 	mmu_page_header_cache = kmem_cache_create("kvm_mmu_page_header",
 						  sizeof(struct kvm_mmu_page),
-						  0, 0, NULL);
+						  0, 0, NULL, NULL);
 	if (!mmu_page_header_cache)
 		goto nomem;
 
 	register_shrinker(&mmu_shrinker);
+	set_shrinker(&mmu_shrinker);
 
 	return 0;
 

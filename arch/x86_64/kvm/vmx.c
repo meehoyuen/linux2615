@@ -3554,7 +3554,7 @@ static void vmx_free_vcpu(struct kvm_vcpu *vcpu)
 static struct kvm_vcpu *vmx_create_vcpu(struct kvm *kvm, unsigned int id)
 {
 	int err;
-	struct vcpu_vmx *vmx = kmem_cache_zalloc(kvm_vcpu_cache, GFP_KERNEL);
+	struct vcpu_vmx *vmx = kmem_cache_alloc(kvm_vcpu_cache, GFP_KERNEL);
 	int cpu;
 
 	if (!vmx)

@@ -88,12 +88,6 @@ struct scan_control {
  * The list of shrinker callbacks used by to apply pressure to
  * ageable caches.
  */
-struct shrinker {
-	shrinker_t		shrinker;
-	struct list_head	list;
-	int			seeks;	/* seeks to recreate an obj */
-	long			nr;	/* objs pending delete */
-};
 
 #define lru_to_page(_head) (list_entry((_head)->prev, struct page, lru))
 

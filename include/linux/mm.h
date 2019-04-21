@@ -738,7 +738,13 @@ typedef int (*shrinker_t)(int nr_to_scan, gfp_t gfp_mask);
  */
 
 #define DEFAULT_SEEKS 2
-struct shrinker;
+struct shrinker {
+        shrinker_t              shrinker;
+        struct list_head        list;
+        int                     seeks;  /* seeks to recreate an obj */
+        long                    nr;     /* objs pending delete */
+};
+
 extern struct shrinker *set_shrinker(int, shrinker_t);
 extern void remove_shrinker(struct shrinker *shrinker);
 

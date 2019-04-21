@@ -143,10 +143,10 @@ int kvm_iommu_map_guest(struct kvm *kvm)
 {
 	int r;
 
-	if (!iommu_found()) {
+	//if (!iommu_found()) {
 		printk(KERN_ERR "%s: iommu not found\n", __func__);
 		return -ENODEV;
-	}
+	//}
 
 	kvm->arch.iommu_domain = iommu_domain_alloc();
 	if (!kvm->arch.iommu_domain)
