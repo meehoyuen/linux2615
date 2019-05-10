@@ -2673,7 +2673,7 @@ static int kvmclock_cpufreq_notifier(struct notifier_block *nb, unsigned long va
          * guest context is entered kvmclock will be updated,
          * so the guest will not see stale values.
          */
-        smp_call_function_single(freq->cpu, bounce_off, NULL, 0, 1);
+        //smp_call_function_single(freq->cpu, bounce_off, NULL, 0, 1);
     }
     return 0;
 }
@@ -4409,6 +4409,6 @@ void kvm_vcpu_kick(struct kvm_vcpu *vcpu)
      * So need not to call smp_call_function_single() in that case.
      */
     if (vcpu->guest_mode && vcpu->cpu != cpu)
-        smp_call_function_single(ipi_pcpu, vcpu_kick_intr, vcpu, 0, 0);
+        ;//smp_call_function_single(ipi_pcpu, vcpu_kick_intr, vcpu, 0, 0);
     put_cpu();
 }

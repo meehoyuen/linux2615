@@ -35,7 +35,7 @@
 #include <linux/sched.h>
 #include <linux/cpumask.h>
 #include <linux/smp.h>
-//#include <linux/anon_inodes.h>
+#include <linux/anon_inodes.h>
 #include <linux/profile.h>
 #include <linux/kvm_para.h>
 #include <linux/pagemap.h>
@@ -578,7 +578,7 @@ static bool make_all_cpus_request(struct kvm *kvm, unsigned int req)
         if (cpu != -1 && cpu != me)
             cpus[cpu] = 1;
     }
-    smp_call_function(ack_flush, NULL, 0, 1);
+    //smp_call_function(ack_flush, NULL, 0, 1);
 
     return true;
 }
@@ -861,7 +861,7 @@ static void kvm_destroy_vm(struct kvm *kvm)
     mmu_notifier_unregister(&kvm->mmu_notifier, kvm->mm);
 #endif
     kvm_arch_destroy_vm(kvm);
-    mmdrop(mm);
+    //mmdrop(mm);
 }
 
 void kvm_get_kvm(struct kvm *kvm)
@@ -1521,7 +1521,7 @@ static struct file_operations kvm_vcpu_fops = {
  */
 static int create_vcpu_fd(struct kvm_vcpu *vcpu)
 {
-    int fd = -1;//anon_inode_getfd("kvm-vcpu", &kvm_vcpu_fops, vcpu, 0);
+    int fd = anon_inode_getfd("kvm-vcpu", &kvm_vcpu_fops, vcpu);
     if (fd < 0)
         kvm_put_kvm(vcpu->kvm);
     return fd;
@@ -1967,7 +1967,7 @@ static int kvm_dev_ioctl_create_vm(void)
     kvm = kvm_create_vm();
     if (IS_ERR(kvm))
         return PTR_ERR(kvm);
-    fd = -1;//anon_inode_getfd("kvm-vm", &kvm_vm_fops, kvm, 0);
+    fd = anon_inode_getfd("kvm-vm", &kvm_vm_fops, kvm);
     if (fd < 0)
         kvm_put_kvm(kvm);
 
@@ -2066,12 +2066,12 @@ static int kvm_cpu_hotplug(struct notifier_block *notifier, unsigned long val,
     case CPU_UP_CANCELED:
         printk(KERN_INFO "kvm: disabling virtualization on CPU%d\n",
                cpu);
-        smp_call_function_single(cpu, hardware_disable, NULL, 0, 1);
+        //smp_call_function_single(cpu, hardware_disable, NULL, 0, 1);
         break;
     case CPU_ONLINE:
         printk(KERN_INFO "kvm: enabling virtualization on CPU%d\n",
                cpu);
-        smp_call_function_single(cpu, hardware_enable, NULL, 0, 1);
+        //smp_call_function_single(cpu, hardware_enable, NULL, 0, 1);
         break;
     }
     return NOTIFY_OK;
@@ -2268,9 +2268,7 @@ int kvm_init(void *opaque, unsigned int vcpu_size,
         goto out_free_0;
 
     for_each_online_cpu(cpu) {
-        smp_call_function_single(cpu,
-                kvm_arch_check_processor_compat,
-                &r, 0, 1);
+        //smp_call_function_single(cpu, kvm_arch_check_processor_compat, &r, 0, 1);
         if (r < 0)
             goto out_free_1;
     }
