@@ -259,7 +259,6 @@ static int assigned_device_update_intx(struct kvm *kvm,
     return 0;
 }
 
-#ifdef CONFIG_X86
 static int assigned_device_update_msi(struct kvm *kvm,
             struct kvm_assigned_dev_kernel *adev,
             struct kvm_assigned_irq *airq)
@@ -312,7 +311,6 @@ static int assigned_device_update_msi(struct kvm *kvm,
     adev->irq_requested_type |= KVM_ASSIGNED_DEV_HOST_MSI;
     return 0;
 }
-#endif
 
 static int kvm_vm_ioctl_assign_irq(struct kvm *kvm,
                    struct kvm_assigned_irq
@@ -348,12 +346,10 @@ static int kvm_vm_ioctl_assign_irq(struct kvm *kvm,
             else
                 match->irq_source_id = r;
 
-#ifdef CONFIG_X86
             /* Determine host device irq type, we can know the
              * result from dev->msi_enabled */
             if (msi2intx)
                 pci_enable_msi(match->dev);
-#endif
         }
     }
 
@@ -365,16 +361,12 @@ static int kvm_vm_ioctl_assign_irq(struct kvm *kvm,
 
     if ((changed_flags & KVM_DEV_IRQ_ASSIGN_MSI_ACTION) ||
         (msi2intx /*&& match->dev->msi_enabled*/)) {
-#ifdef CONFIG_X86
         r = assigned_device_update_msi(kvm, match, assigned_irq);
         if (r) {
             printk(KERN_WARNING "kvm: failed to enable "
                     "MSI device!\n");
             goto out_release;
         }
-#else
-        r = -ENOTTY;
-#endif
     } else if (assigned_irq->host_irq == 0 && match->dev->irq == 0) {
         /* Host device IRQ 0 means don't support INTx */
         if (!msi2intx) {
@@ -1468,10 +1460,9 @@ static int kvm_vcpu_nopage(struct vm_area_struct *vma, unsigned long address, in
 
     if (vmf->pgoff == 0)
         page = virt_to_page(vcpu->run);
-#ifdef CONFIG_X86
     else if (vmf->pgoff == KVM_PIO_PAGE_OFFSET)
         page = virt_to_page(vcpu->arch.pio_data);
-#endif
+
 #ifdef KVM_COALESCED_MMIO_PAGE_OFFSET
     else if (vmf->pgoff == KVM_COALESCED_MMIO_PAGE_OFFSET)
         page = virt_to_page(vcpu->kvm->coalesced_mmio_ring);
@@ -2017,9 +2008,8 @@ static long kvm_dev_ioctl(struct file *filp,
         if (arg)
             goto out;
         r = PAGE_SIZE;     /* struct kvm_run */
-#ifdef CONFIG_X86
         r += PAGE_SIZE;    /* pio data page */
-#endif
+
 #ifdef KVM_COALESCED_MMIO_PAGE_OFFSET
         r += PAGE_SIZE;    /* coalesced mmio ring page */
 #endif
@@ -2303,10 +2293,6 @@ int kvm_init(void *opaque, unsigned int vcpu_size,
         printk(KERN_ERR "kvm: misc device register failed\n");
         goto out_free;
     }
-
-#ifndef CONFIG_X86
-    msi2intx = 0;
-#endif
 
     printk(KERN_ERR "kvm_init ok\n");
 
