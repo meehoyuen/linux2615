@@ -2171,7 +2171,7 @@ static int cache_grow(kmem_cache_t *cachep, gfp_t flags, int nodeid)
 	/* Be lazy and only check for valid flags here,
  	 * keeping it out of the critical path in kmem_cache_alloc().
 	 */
-	if (flags & ~(SLAB_DMA|SLAB_LEVEL_MASK|SLAB_NO_GROW))
+	if (flags & ~(__GFP_ZERO | SLAB_DMA|SLAB_LEVEL_MASK|SLAB_NO_GROW))
 		BUG();
 	if (flags & SLAB_NO_GROW)
 		return 0;
@@ -2552,6 +2552,10 @@ static inline void *__cache_alloc(kmem_cache_t *cachep, gfp_t flags)
 	objp = cache_alloc_debugcheck_after(cachep, flags, objp,
 					__builtin_return_address(0));
 	prefetchw(objp);
+
+	if (unlikely((flags & __GFP_ZERO) && objp))
+		memset(objp, 0, cachep->objsize);
+
 	return objp;
 }
 

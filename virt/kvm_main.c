@@ -923,7 +923,7 @@ int __kvm_set_memory_region(struct kvm *kvm,
     new.base_gfn = base_gfn;
     new.npages = npages;
     new.flags = mem->flags;
-
+printk("%s::%d base_gfn:%lx\n", __FUNCTION__,__LINE__,new.base_gfn);
     /* Disallow changing a memory slot's size. */
     r = -EINVAL;
     if (npages && old.npages && npages != old.npages)
@@ -948,7 +948,6 @@ int __kvm_set_memory_region(struct kvm *kvm,
     r = -ENOMEM;
 
     /* Allocate if a slot is being created */
-#ifndef CONFIG_S390
     if (npages && !new.rmap) {
         new.rmap = vmalloc(npages * sizeof(struct page *));
 
@@ -994,7 +993,6 @@ int __kvm_set_memory_region(struct kvm *kvm,
             goto out_free;
         memset(new.dirty_bitmap, 0, dirty_bytes);
     }
-#endif /* not defined CONFIG_S390 */
 
     if (!npages)
         kvm_arch_flush_shadow(kvm);
@@ -1024,6 +1022,8 @@ int __kvm_set_memory_region(struct kvm *kvm,
     if (r)
         goto out;
 #endif
+kvm->memslots[mem->slot];
+printk("%s::%d mem_slot[%d].base_gfn:%lx\n", __FUNCTION__,__LINE__,mem->slot,kvm->memslots[mem->slot].base_gfn);
     return 0;
 
 out_free:
@@ -1120,7 +1120,7 @@ struct kvm_memory_slot *gfn_to_memslot_unaliased(struct kvm *kvm, gfn_t gfn)
 
     for (i = 0; i < kvm->nmemslots; ++i) {
         struct kvm_memory_slot *memslot = &kvm->memslots[i];
-
+printk("%s::%d gfn:%lx, range:%lx-%lx\n", __FUNCTION__,__LINE__,gfn,memslot->base_gfn,memslot->base_gfn + memslot->npages);
         if (gfn >= memslot->base_gfn
             && gfn < memslot->base_gfn + memslot->npages)
             return memslot;
@@ -1158,7 +1158,10 @@ unsigned long gfn_to_hva(struct kvm *kvm, gfn_t gfn)
     gfn = unalias_gfn(kvm, gfn);
     slot = gfn_to_memslot_unaliased(kvm, gfn);
     if (!slot)
+	{
+		printk("%s::%d gfn:%lx, slot:%lx\n", __FUNCTION__,__LINE__,gfn,slot);
         return bad_hva();
+	}
     return (slot->userspace_addr + (gfn - slot->base_gfn) * PAGE_SIZE);
 }
 EXPORT_SYMBOL_GPL(gfn_to_hva);
@@ -1348,10 +1351,17 @@ int kvm_write_guest_page(struct kvm *kvm, gfn_t gfn, const void *data,
 
     addr = gfn_to_hva(kvm, gfn);
     if (kvm_is_error_hva(addr))
+	{
+		printk("%s::%d gfn:%llx, addr:%llx\n", __FUNCTION__,__LINE__,gfn,addr);
         return -EFAULT;
+	}
     r = copy_to_user((void __user *)addr + offset, data, len);
     if (r)
+	{
+		printk("%s::%d\n", __FUNCTION__,__LINE__);
         return -EFAULT;
+	}
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
     mark_page_dirty(kvm, gfn);
     return 0;
 }
@@ -1364,7 +1374,7 @@ int kvm_write_guest(struct kvm *kvm, gpa_t gpa, const void *data,
     int seg;
     int offset = offset_in_page(gpa);
     int ret;
-
+printk("%s::%d gfn:%llx\n", __FUNCTION__,__LINE__,gfn);
     while ((seg = next_segment(len, offset)) != 0) {
         ret = kvm_write_guest_page(kvm, gfn, data, offset, seg);
         if (ret < 0)
@@ -1528,15 +1538,15 @@ static int kvm_vm_ioctl_create_vcpu(struct kvm *kvm, int n)
 
     if (!valid_vcpu(n))
         return -EINVAL;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vcpu = kvm_arch_vcpu_create(kvm, n);
     if (IS_ERR(vcpu))
         return PTR_ERR(vcpu);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     r = kvm_arch_vcpu_setup(vcpu);
     if (r)
         return r;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     down(&kvm->lock);
     if (kvm->vcpus[n]) {
         r = -EEXIST;
@@ -1544,17 +1554,18 @@ static int kvm_vm_ioctl_create_vcpu(struct kvm *kvm, int n)
     }
     kvm->vcpus[n] = vcpu;
     up(&kvm->lock);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     /* Now it's all set up, let userspace reach it */
     kvm_get_kvm(kvm);
     r = create_vcpu_fd(vcpu);
     if (r < 0)
         goto unlink;
     return r;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
 unlink:
     down(&kvm->lock);
     kvm->vcpus[n] = NULL;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
 vcpu_destroy:
     up(&kvm->lock);
     kvm_arch_vcpu_destroy(vcpu);
@@ -2056,12 +2067,12 @@ static int kvm_cpu_hotplug(struct notifier_block *notifier, unsigned long val,
     case CPU_UP_CANCELED:
         printk(KERN_INFO "kvm: disabling virtualization on CPU%d\n",
                cpu);
-        //smp_call_function_single(cpu, hardware_disable, NULL, 0, 1);
+        smp_call_function_single(cpu, hardware_disable, NULL, 0, 1);
         break;
     case CPU_ONLINE:
         printk(KERN_INFO "kvm: enabling virtualization on CPU%d\n",
                cpu);
-        //smp_call_function_single(cpu, hardware_enable, NULL, 0, 1);
+        smp_call_function_single(cpu, hardware_enable, NULL, 0, 1);
         break;
     }
     return NOTIFY_OK;
@@ -2258,7 +2269,7 @@ int kvm_init(void *opaque, unsigned int vcpu_size,
         goto out_free_0;
 
     for_each_online_cpu(cpu) {
-        //smp_call_function_single(cpu, kvm_arch_check_processor_compat, &r, 0, 1);
+        smp_call_function_single(cpu, kvm_arch_check_processor_compat, &r, 0, 1);
         if (r < 0)
             goto out_free_1;
     }

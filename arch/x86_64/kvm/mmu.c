@@ -279,7 +279,7 @@ static int mmu_topup_memory_cache(struct kvm_mmu_memory_cache *cache,
     if (cache->nobjs >= min)
         return 0;
     while (cache->nobjs < ARRAY_SIZE(cache->objects)) {
-        obj = kmem_cache_alloc(base_cache, GFP_KERNEL);
+        obj = kmem_cache_alloc(base_cache, GFP_KERNEL | __GFP_ZERO);
         if (!obj)
             return -ENOMEM;
         cache->objects[cache->nobjs++] = obj;

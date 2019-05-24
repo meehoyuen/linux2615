@@ -1617,6 +1617,7 @@ static int kvm_vm_ioctl_set_memory_alias(struct kvm *kvm,
 
     p = &kvm->arch.aliases[alias->slot];
     p->base_gfn = alias->guest_phys_addr >> PAGE_SHIFT;
+	printk("%s::%d base_gfn:%lx\n", __FUNCTION__,__LINE__,p->base_gfn);
     p->npages = alias->memory_size >> PAGE_SHIFT;
     p->target_gfn = alias->target_phys_addr >> PAGE_SHIFT;
 
@@ -2673,7 +2674,7 @@ static int kvmclock_cpufreq_notifier(struct notifier_block *nb, unsigned long va
          * guest context is entered kvmclock will be updated,
          * so the guest will not see stale values.
          */
-        //smp_call_function_single(freq->cpu, bounce_off, NULL, 0, 1);
+        smp_call_function_single(freq->cpu, bounce_off, NULL, 0, 1);
     }
     return 0;
 }
@@ -3247,34 +3248,36 @@ int kvm_arch_vcpu_ioctl_run(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
 {
     int r;
     sigset_t sigsaved;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vcpu_load(vcpu);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (vcpu->sigset_active)
         sigprocmask(SIG_SETMASK, &vcpu->sigset, &sigsaved);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (unlikely(vcpu->arch.mp_state == KVM_MP_STATE_UNINITIALIZED)) {
+		printk("%s::%d\n", __FUNCTION__,__LINE__);
         kvm_vcpu_block(vcpu);
         clear_bit(KVM_REQ_UNHALT, &vcpu->requests);
         r = -EAGAIN;
         goto out;
     }
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     /* re-sync apic's tpr */
     if (!irqchip_in_kernel(vcpu->kvm))
         kvm_set_cr8(vcpu, kvm_run->cr8);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (vcpu->arch.pio.cur_count) {
+		printk("%s::%d\n", __FUNCTION__,__LINE__);
         r = complete_pio(vcpu);
         if (r)
             goto out;
     }
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (vcpu->mmio_needed) {
         memcpy(vcpu->mmio_data, kvm_run->mmio.data, 8);
         vcpu->mmio_read_completed = 1;
         vcpu->mmio_needed = 0;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
         down_read(&vcpu->kvm->slots_lock);
         r = emulate_instruction(vcpu, kvm_run,
                     vcpu->arch.mmio_fault_cr2, 0,
@@ -3284,22 +3287,23 @@ int kvm_arch_vcpu_ioctl_run(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
             /*
              * Read-modify-write.  Back to userspace.
              */
-            r = 0;
+            r = 0;printk("%s::%d\n", __FUNCTION__,__LINE__);
             goto out;
         }
     }
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (kvm_run->exit_reason == KVM_EXIT_HYPERCALL)
         kvm_register_write(vcpu, VCPU_REGS_RAX,
                      kvm_run->hypercall.ret);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     r = __vcpu_run(vcpu, kvm_run);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
 out:
     if (vcpu->sigset_active)
         sigprocmask(SIG_SETMASK, &sigsaved, NULL);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vcpu_put(vcpu);
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     return r;
 }
 
@@ -4139,18 +4143,22 @@ int kvm_arch_vcpu_setup(struct kvm_vcpu *vcpu)
 
     /* We do fxsave: this must be aligned. */
     BUG_ON((unsigned long)&vcpu->arch.host_fx_image & 0xF);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vcpu->arch.mtrr_state.have_fixed = 1;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vcpu_load(vcpu);
     r = kvm_arch_vcpu_reset(vcpu);
+printk("%s::%d r:%d\n", __FUNCTION__,__LINE__,r);
     if (r == 0)
         r = kvm_mmu_setup(vcpu);
+printk("%s::%d r:%d\n", __FUNCTION__,__LINE__,r);
     vcpu_put(vcpu);
     if (r < 0)
         goto free_vcpu;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     return 0;
 free_vcpu:
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     kvm_x86_ops->vcpu_free(vcpu);
     return r;
 }
@@ -4173,7 +4181,7 @@ int kvm_arch_vcpu_reset(struct kvm_vcpu *vcpu)
     memset(vcpu->arch.db, 0, sizeof(vcpu->arch.db));
     vcpu->arch.dr6 = DR6_FIXED_1;
     vcpu->arch.dr7 = DR7_FIXED_1;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     return kvm_x86_ops->vcpu_reset(vcpu);
 }
 
@@ -4409,6 +4417,6 @@ void kvm_vcpu_kick(struct kvm_vcpu *vcpu)
      * So need not to call smp_call_function_single() in that case.
      */
     if (vcpu->guest_mode && vcpu->cpu != cpu)
-        ;//smp_call_function_single(ipi_pcpu, vcpu_kick_intr, vcpu, 0, 0);
+        smp_call_function_single(ipi_pcpu, vcpu_kick_intr, vcpu, 0, 0);
     put_cpu();
 }

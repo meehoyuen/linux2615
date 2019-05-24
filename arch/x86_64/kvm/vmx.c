@@ -364,7 +364,7 @@ static void vcpu_clear(struct vcpu_vmx *vmx)
     if (vmx->vcpu.cpu == -1)
         return;
 
-    //smp_call_function_single(vmx->vcpu.cpu, __vcpu_clear, vmx, 0/*not used*/, 1);
+    smp_call_function_single(vmx->vcpu.cpu, __vcpu_clear, vmx, 0/*not used*/, 1);
 }
 
 static inline void vpid_sync_vcpu_all(struct vcpu_vmx *vmx)
@@ -1362,9 +1362,11 @@ static gva_t rmode_tss_base(struct kvm *kvm)
 {
     if (!kvm->arch.tss_addr) {
         gfn_t base_gfn = kvm->memslots[0].base_gfn +
-                 kvm->memslots[0].npages - 3;
+                 kvm->memslots[0].npages - 3;  //why - 3????
+	printk("%s::%d base_gfn:%lx = %lx + %lx - 3\n", __FUNCTION__,__LINE__,base_gfn,kvm->memslots[0].base_gfn,kvm->memslots[0].npages);			 
         return base_gfn << PAGE_SHIFT;
     }
+	printk("%s::%d kvm->arch.tss_addr:%lx\n", __FUNCTION__,__LINE__,kvm->arch.tss_addr);
     return kvm->arch.tss_addr;
 }
 
@@ -1951,28 +1953,32 @@ static int init_rmode_tss(struct kvm *kvm)
     u16 data = 0;
     int ret = 0;
     int r;
-
+printk("%s::%d fn:%llx\n", __FUNCTION__,__LINE__,fn);
     r = kvm_clear_guest_page(kvm, fn, 0, PAGE_SIZE);
     if (r < 0)
         goto out;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     data = TSS_BASE_SIZE + TSS_REDIRECTION_SIZE;
     r = kvm_write_guest_page(kvm, fn++, &data,
             TSS_IOPB_BASE_OFFSET, sizeof(u16));
     if (r < 0)
         goto out;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     r = kvm_clear_guest_page(kvm, fn++, 0, PAGE_SIZE);
     if (r < 0)
         goto out;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     r = kvm_clear_guest_page(kvm, fn, 0, PAGE_SIZE);
     if (r < 0)
         goto out;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     data = ~0;
     r = kvm_write_guest_page(kvm, fn, &data,
                  RMODE_TSS_SIZE - 2 * PAGE_SIZE - 1,
                  sizeof(u8));
     if (r < 0)
         goto out;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     ret = 1;
 out:
     return ret;
@@ -1983,33 +1989,40 @@ static int init_rmode_identity_map(struct kvm *kvm)
     int i, r, ret;
     pfn_t identity_map_pfn;
     u32 tmp;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (!vm_need_ept())
         return 1;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (unlikely(!kvm->arch.ept_identity_pagetable)) {
         printk(KERN_ERR "EPT: identity-mapping pagetable "
             "haven't been allocated!\n");
         return 0;
     }
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (likely(kvm->arch.ept_identity_pagetable_done))
         return 1;
     ret = 0;
     identity_map_pfn = VMX_EPT_IDENTITY_PAGETABLE_ADDR >> PAGE_SHIFT;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     r = kvm_clear_guest_page(kvm, identity_map_pfn, 0, PAGE_SIZE);
     if (r < 0)
         goto out;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     /* Set up identity-mapping pagetable for EPT in real mode */
     for (i = 0; i < PT32_ENT_PER_PAGE; i++) {
         tmp = (i << 22) + (_PAGE_PRESENT | _PAGE_RW | _PAGE_USER |
             _PAGE_ACCESSED | _PAGE_DIRTY | _PAGE_PSE);
         r = kvm_write_guest_page(kvm, identity_map_pfn,
                 &tmp, i * sizeof(tmp), sizeof(tmp));
+		printk("%s::%d\n", __FUNCTION__,__LINE__);
         if (r < 0)
             goto out;
     }
     kvm->arch.ept_identity_pagetable_done = true;
     ret = 1;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
 out:
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     return ret;
 }
 
@@ -2121,20 +2134,20 @@ static int vmx_vcpu_setup(struct vcpu_vmx *vmx)
     int i;
     unsigned long kvm_vmx_return;
     u32 exec_control;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     /* I/O */
     vmcs_write64(IO_BITMAP_A, page_to_phys(vmx_io_bitmap_a));
     vmcs_write64(IO_BITMAP_B, page_to_phys(vmx_io_bitmap_b));
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (cpu_has_vmx_msr_bitmap())
         vmcs_write64(MSR_BITMAP, page_to_phys(vmx_msr_bitmap));
 
     vmcs_write64(VMCS_LINK_POINTER, -1ull); /* 22.3.1.5 */
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     /* Control */
     vmcs_write32(PIN_BASED_VM_EXEC_CONTROL,
         vmcs_config.pin_based_exec_ctrl);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     exec_control = vmcs_config.cpu_based_exec_ctrl;
     if (!vm_need_tpr_shadow(vmx->vcpu.kvm)) {
         exec_control &= ~CPU_BASED_TPR_SHADOW;
@@ -2148,7 +2161,7 @@ static int vmx_vcpu_setup(struct vcpu_vmx *vmx)
                 CPU_BASED_CR3_LOAD_EXITING  |
                 CPU_BASED_INVLPG_EXITING;
     vmcs_write32(CPU_BASED_VM_EXEC_CONTROL, exec_control);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (cpu_has_secondary_exec_ctrls()) {
         exec_control = vmcs_config.cpu_based_2nd_exec_ctrl;
         if (!vm_need_virtualize_apic_accesses(vmx->vcpu.kvm))
@@ -2160,7 +2173,7 @@ static int vmx_vcpu_setup(struct vcpu_vmx *vmx)
             exec_control &= ~SECONDARY_EXEC_ENABLE_EPT;
         vmcs_write32(SECONDARY_VM_EXEC_CONTROL, exec_control);
     }
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vmcs_write32(PAGE_FAULT_ERROR_CODE_MASK, !!bypass_guest_pf);
     vmcs_write32(PAGE_FAULT_ERROR_CODE_MATCH, !!bypass_guest_pf);
     vmcs_write32(CR3_TARGET_COUNT, 0);           /* 22.2.1 */
@@ -2168,7 +2181,7 @@ static int vmx_vcpu_setup(struct vcpu_vmx *vmx)
     vmcs_writel(HOST_CR0, read_cr0());  /* 22.2.3 */
     vmcs_writel(HOST_CR4, read_cr4());  /* 22.2.3, 22.2.5 */
     vmcs_writel(HOST_CR3, read_cr3());  /* 22.2.3  FIXME: shadow tables */
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vmcs_write16(HOST_CS_SELECTOR, __KERNEL_CS);  /* 22.2.4 */
     vmcs_write16(HOST_DS_SELECTOR, __KERNEL_DS);  /* 22.2.4 */
     vmcs_write16(HOST_ES_SELECTOR, __KERNEL_DS);  /* 22.2.4 */
@@ -2184,18 +2197,18 @@ static int vmx_vcpu_setup(struct vcpu_vmx *vmx)
     vmcs_writel(HOST_FS_BASE, 0); /* 22.2.4 */
     vmcs_writel(HOST_GS_BASE, 0); /* 22.2.4 */
 #endif
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vmcs_write16(HOST_TR_SELECTOR, GDT_ENTRY_TSS*8);  /* 22.2.4 */
 
     kvm_get_idt(&dt);
     vmcs_writel(HOST_IDTR_BASE, dt.base);   /* 22.2.4 */
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     asm("mov $.Lkvm_vmx_return, %0" : "=r"(kvm_vmx_return));
     vmcs_writel(HOST_RIP, kvm_vmx_return); /* 22.2.5 */
     vmcs_write32(VM_EXIT_MSR_STORE_COUNT, 0);
     vmcs_write32(VM_EXIT_MSR_LOAD_COUNT, 0);
     vmcs_write32(VM_ENTRY_MSR_LOAD_COUNT, 0);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     rdmsr(MSR_IA32_SYSENTER_CS, host_sysenter_cs, junk);
     vmcs_write32(HOST_IA32_SYSENTER_CS, host_sysenter_cs);
     rdmsrl(MSR_IA32_SYSENTER_ESP, a);
@@ -2207,7 +2220,7 @@ static int vmx_vcpu_setup(struct vcpu_vmx *vmx)
         rdmsr(MSR_IA32_CR_PAT, msr_low, msr_high);
         host_pat = msr_low | ((u64) msr_high << 32);
         vmcs_write64(HOST_IA32_PAT, host_pat);
-    }
+    }printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (vmcs_config.vmentry_ctrl & VM_ENTRY_LOAD_IA32_PAT) {
         rdmsr(MSR_IA32_CR_PAT, msr_low, msr_high);
         host_pat = msr_low | ((u64) msr_high << 32);
@@ -2216,25 +2229,31 @@ static int vmx_vcpu_setup(struct vcpu_vmx *vmx)
         /* Keep arch.pat sync with GUEST_IA32_PAT */
         vmx->vcpu.arch.pat = host_pat;
     }
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     for (i = 0; i < NR_VMX_MSR; ++i) {
         u32 index = vmx_msr_index[i];
         u32 data_low, data_high;
         u64 data;
         int j = vmx->nmsrs;
-
+printk("%s::%d %d/%d\n", __FUNCTION__,__LINE__,i,NR_VMX_MSR);
         if (rdmsr_safe(index, &data_low, &data_high) < 0)
             continue;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
         if (wrmsr_safe(index, data_low, data_high) < 0)
             continue;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
         data = data_low | ((u64)data_high << 32);
+printk("%s::%d bad j=%d\n", __FUNCTION__,__LINE__,j);
         vmx->host_msrs[j].index = index;
         vmx->host_msrs[j].reserved = 0;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
         vmx->host_msrs[j].data = data;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
         vmx->guest_msrs[j] = vmx->host_msrs[j];
+printk("%s::%d\n", __FUNCTION__,__LINE__);
         ++vmx->nmsrs;
     }
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vmcs_write32(VM_EXIT_CONTROLS, vmcs_config.vmexit_ctrl);
 
     /* 22.2.1, 20.8.1 */
@@ -2242,12 +2261,12 @@ static int vmx_vcpu_setup(struct vcpu_vmx *vmx)
 
     vmcs_writel(CR0_GUEST_HOST_MASK, ~0UL);
     vmcs_writel(CR4_GUEST_HOST_MASK, KVM_GUEST_CR4_MASK);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     tsc_base = vmx->vcpu.kvm->arch.vm_init_tsc;
     rdtscll(tsc_this);
     if (tsc_this < vmx->vcpu.kvm->arch.vm_init_tsc)
         tsc_base = tsc_this;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     guest_write_tsc(0, tsc_base);
 
     return 0;
@@ -2255,8 +2274,10 @@ static int vmx_vcpu_setup(struct vcpu_vmx *vmx)
 
 static int init_rmode(struct kvm *kvm)
 {
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (!init_rmode_tss(kvm))
         return 0;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (!init_rmode_identity_map(kvm))
         return 0;
     return 1;
@@ -2267,14 +2288,14 @@ static int vmx_vcpu_reset(struct kvm_vcpu *vcpu)
     struct vcpu_vmx *vmx = to_vmx(vcpu);
     u64 msr;
     int ret;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vcpu->arch.regs_avail = ~((1 << VCPU_REGS_RIP) | (1 << VCPU_REGS_RSP));
     down_read(&vcpu->kvm->slots_lock);
     if (!init_rmode(vmx->vcpu.kvm)) {
         ret = -ENOMEM;
         goto out;
     }
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vmx->vcpu.arch.rmode.active = 0;
 
     vmx->soft_vnmi_blocked = 0;
@@ -3539,74 +3560,88 @@ static void vmx_free_vmcs(struct kvm_vcpu *vcpu)
 static void vmx_free_vcpu(struct kvm_vcpu *vcpu)
 {
     struct vcpu_vmx *vmx = to_vmx(vcpu);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     spin_lock(&vmx_vpid_lock);
     if (vmx->vpid != 0)
         __clear_bit(vmx->vpid, vmx_vpid_bitmap);
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     spin_unlock(&vmx_vpid_lock);
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vmx_free_vmcs(vcpu);
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     kfree(vmx->host_msrs);
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     kfree(vmx->guest_msrs);
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     kvm_vcpu_uninit(vcpu);
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     kmem_cache_free(kvm_vcpu_cache, vmx);
+printk("%s::%d\n", __FUNCTION__,__LINE__);
 }
 
 static struct kvm_vcpu *vmx_create_vcpu(struct kvm *kvm, unsigned int id)
 {
     int err;
-    struct vcpu_vmx *vmx = kmem_cache_alloc(kvm_vcpu_cache, GFP_KERNEL);
+    struct vcpu_vmx *vmx = kmem_cache_alloc(kvm_vcpu_cache, GFP_KERNEL | __GFP_ZERO);
     int cpu;
 
     if (!vmx)
         return ERR_PTR(-ENOMEM);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     allocate_vpid(vmx);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     err = kvm_vcpu_init(&vmx->vcpu, kvm, id);
     if (err)
         goto free_vcpu;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vmx->guest_msrs = kmalloc(PAGE_SIZE, GFP_KERNEL);
     if (!vmx->guest_msrs) {
         err = -ENOMEM;
         goto uninit_vcpu;
     }
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vmx->host_msrs = kmalloc(PAGE_SIZE, GFP_KERNEL);
     if (!vmx->host_msrs)
         goto free_guest_msrs;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vmx->vmcs = alloc_vmcs();
     if (!vmx->vmcs)
         goto free_msrs;
 
     vmcs_clear(vmx->vmcs);
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     cpu = get_cpu();
     vmx_vcpu_load(&vmx->vcpu, cpu);
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     err = vmx_vcpu_setup(vmx);
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     vmx_vcpu_put(&vmx->vcpu);
     put_cpu();
     if (err)
         goto free_vmcs;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (vm_need_virtualize_apic_accesses(kvm))
         if (alloc_apic_access_page(kvm) != 0)
             goto free_vmcs;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (vm_need_ept())
         if (alloc_identity_pagetable(kvm) != 0)
             goto free_vmcs;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
     return &vmx->vcpu;
-
+printk("%s::%d\n", __FUNCTION__,__LINE__);
 free_vmcs:
     free_vmcs(vmx->vmcs);
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
 free_msrs:
     kfree(vmx->host_msrs);
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
 free_guest_msrs:
     kfree(vmx->guest_msrs);
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
 uninit_vcpu:
     kvm_vcpu_uninit(&vmx->vcpu);
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
 free_vcpu:
     kmem_cache_free(kvm_vcpu_cache, vmx);
     return ERR_PTR(err);

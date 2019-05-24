@@ -19,6 +19,7 @@
 #include <linux/kernel_stat.h>
 #include <linux/mc146818rtc.h>
 #include <linux/interrupt.h>
+#include <linux/module.h> //EXPORT_SYMBOL_GPL
 
 #include <asm/mtrr.h>
 #include <asm/pgalloc.h>
@@ -377,13 +378,17 @@ int smp_call_function_single (int cpu, void (*func) (void *info), void *info,
 	/* prevent preemption and reschedule on another processor */
 	int me = get_cpu();
 	if (cpu == me) {
-		WARN_ON(1);
-		put_cpu();
-		return -EBUSY;
+		unsigned long flags;
+		local_irq_save(flags);
+		func(info);
+		local_irq_restore(flags);
 	}
-	spin_lock_bh(&call_lock);
-	__smp_call_function_single(cpu, func, info, nonatomic, wait);
-	spin_unlock_bh(&call_lock);
+	else
+	{
+		spin_lock_bh(&call_lock);
+		__smp_call_function_single(cpu, func, info, nonatomic, wait);
+		spin_unlock_bh(&call_lock);
+	}
 	put_cpu();
 	return 0;
 }
