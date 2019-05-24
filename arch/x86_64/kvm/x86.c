@@ -3287,7 +3287,8 @@ printk("%s::%d\n", __FUNCTION__,__LINE__);
             /*
              * Read-modify-write.  Back to userspace.
              */
-            r = 0;printk("%s::%d\n", __FUNCTION__,__LINE__);
+            r = 0;
+printk("%s::%d\n", __FUNCTION__,__LINE__);
             goto out;
         }
     }
