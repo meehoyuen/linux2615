@@ -2786,10 +2786,7 @@ static int mmu_shrink(int nr_to_scan, gfp_t gfp_mask)
     return cache_count;
 }
 
-static struct shrinker mmu_shrinker = {
-    .shrinker = mmu_shrink,
-    .seeks = DEFAULT_SEEKS * 10,
-};
+static struct shrinker *mmu_shrinker;
 
 static void mmu_destroy_caches(void)
 {
@@ -2804,7 +2801,7 @@ static void mmu_destroy_caches(void)
 void kvm_mmu_module_exit(void)
 {
     mmu_destroy_caches();
-    remove_shrinker(&mmu_shrinker);
+    remove_shrinker(mmu_shrinker);
 }
 
 int kvm_mmu_module_init(void)
@@ -2826,7 +2823,7 @@ int kvm_mmu_module_init(void)
     if (!mmu_page_header_cache)
         goto nomem;
 
-    set_shrinker(DEFAULT_SEEKS * 10, &mmu_shrinker);
+    mmu_shrinker = set_shrinker(DEFAULT_SEEKS * 10, &mmu_shrink);
 
     return 0;
 

@@ -2337,16 +2337,28 @@ EXPORT_SYMBOL_GPL(kvm_init);
 
 void kvm_exit(void)
 {
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
     misc_deregister(&kvm_dev);
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
     kmem_cache_destroy(kvm_vcpu_cache);
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
     sysdev_unregister(&kvm_sysdev);
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
     sysdev_class_unregister(&kvm_sysdev_class);
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
     unregister_reboot_notifier(&kvm_reboot_notifier);
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
     unregister_cpu_notifier(&kvm_cpu_notifier);
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
     on_each_cpu(hardware_disable, NULL, 0, 1);
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
     kvm_arch_hardware_unsetup();
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
     kvm_arch_exit();
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
     kvm_exit_debug();
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
     __free_page(bad_page);
+	printk("%s::%d\n", __FUNCTION__,__LINE__);
 }
 EXPORT_SYMBOL_GPL(kvm_exit);
