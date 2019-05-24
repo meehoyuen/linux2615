@@ -3092,6 +3092,7 @@ static int handle_ept_violation(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
             (long unsigned int)vmcs_read64(GUEST_LINEAR_ADDRESS));
         printk(KERN_ERR "EPT: Exit qualification is 0x%lx\n",
             (long unsigned int)exit_qualification);
+		printk("%s::%d KVM_EXIT_UNKNOWN ept violation\n", __FUNCTION__,__LINE__);
         kvm_run->exit_reason = KVM_EXIT_UNKNOWN;
         kvm_run->hw.hardware_exit_reason = 0;
         return -ENOTSUPP;
@@ -3244,6 +3245,7 @@ static int kvm_handle_exit(struct kvm_run *kvm_run, struct kvm_vcpu *vcpu)
         && kvm_vmx_exit_handlers[exit_reason])
         return kvm_vmx_exit_handlers[exit_reason](vcpu, kvm_run);
     else {
+		printk("%s::%d KVM_EXIT_UNKNOWN\n", __FUNCTION__,__LINE__);
         kvm_run->exit_reason = KVM_EXIT_UNKNOWN;
         kvm_run->hw.hardware_exit_reason = exit_reason;
     }

@@ -2510,6 +2510,8 @@ int kvm_emulate_pio(struct kvm_vcpu *vcpu, struct kvm_run *run, int in,
     struct kvm_io_device *pio_dev;
     unsigned long val;
 
+	printk("%s::%d KVM_EXIT_IO\n", __FUNCTION__,__LINE__);
+
     vcpu->run->exit_reason = KVM_EXIT_IO;
     vcpu->run->io.direction = in ? KVM_EXIT_IO_IN : KVM_EXIT_IO_OUT;
     vcpu->run->io.size = vcpu->arch.pio.size = size;
@@ -2548,6 +2550,8 @@ int kvm_emulate_pio_string(struct kvm_vcpu *vcpu, struct kvm_run *run, int in,
     unsigned now, in_page;
     int ret = 0;
     struct kvm_io_device *pio_dev;
+
+	printk("%s::%d KVM_EXIT_IO\n", __FUNCTION__,__LINE__);
 
     vcpu->run->exit_reason = KVM_EXIT_IO;
     vcpu->run->io.direction = in ? KVM_EXIT_IO_IN : KVM_EXIT_IO_OUT;
@@ -2748,6 +2752,7 @@ int kvm_emulate_halt(struct kvm_vcpu *vcpu)
         vcpu->arch.mp_state = KVM_MP_STATE_HALTED;
         return 1;
     } else {
+		printk("%s::%d KVM_EXIT_HLT\n", __FUNCTION__,__LINE__);
         vcpu->run->exit_reason = KVM_EXIT_HLT;
         return 0;
     }

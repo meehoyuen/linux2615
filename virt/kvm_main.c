@@ -2337,7 +2337,6 @@ EXPORT_SYMBOL_GPL(kvm_init);
 
 void kvm_exit(void)
 {
-    kvm_trace_cleanup();
     misc_deregister(&kvm_dev);
     kmem_cache_destroy(kvm_vcpu_cache);
     sysdev_unregister(&kvm_sysdev);
