@@ -30,27 +30,4 @@ my @LOCALVERSIONS = ();
 # match, return nothing, otherwise, return a subset of the SHA-1 hash in
 # .git/HEAD
 
-sub do_git_checks {
-	open(H,"<.git/HEAD") or return;
-	my $head = <H>;
-	chomp $head;
-	close(H);
-
-	opendir(D,".git/refs/tags") or return;
-	foreach my $tagfile (grep !/^\.{1,2}$/, readdir(D)) {
-		open(F,"<.git/refs/tags/" . $tagfile) or return;
-		my $tag = <F>;
-		chomp $tag;
-		close(F);
-		return if ($tag eq $head);
-	}
-	closedir(D);
-
-	push @LOCALVERSIONS, "g" . substr($head,0,8);
-}
-
-if ( -d ".git") {
-	do_git_checks();
-}
-
 printf "-%s\n", join("-",@LOCALVERSIONS) if (scalar @LOCALVERSIONS > 0);

@@ -2138,7 +2138,7 @@ printk("%s::%d\n", __FUNCTION__,__LINE__);
     /* I/O */
     vmcs_write64(IO_BITMAP_A, page_to_phys(vmx_io_bitmap_a));
     vmcs_write64(IO_BITMAP_B, page_to_phys(vmx_io_bitmap_b));
-printk("%s::%d\n", __FUNCTION__,__LINE__);
+
     if (cpu_has_vmx_msr_bitmap())
         vmcs_write64(MSR_BITMAP, page_to_phys(vmx_msr_bitmap));
 
@@ -3187,7 +3187,7 @@ static int kvm_handle_exit(struct kvm_run *kvm_run, struct kvm_vcpu *vcpu)
     u32 exit_reason = vmcs_read32(VM_EXIT_REASON);
     struct vcpu_vmx *vmx = to_vmx(vcpu);
     u32 vectoring_info = vmx->idt_vectoring_info;
-
+    printk("%s::%d reson:0x%x\n", __FUNCTION__, __LINE__,exit_reason);
     KVMTRACE_3D(VMEXIT, vcpu, exit_reason, (u32)kvm_rip_read(vcpu),
             (u32)((u64)kvm_rip_read(vcpu) >> 32), entryexit);
 
@@ -3196,6 +3196,7 @@ static int kvm_handle_exit(struct kvm_run *kvm_run, struct kvm_vcpu *vcpu)
     if (vmx->emulation_required && emulate_invalid_guest_state) {
         if (guest_state_valid(vcpu))
             vmx->emulation_required = 0;
+	 printk("%s::%d EMULATE_DO_MMIO\n", __FUNCTION__,__LINE__);
         return vmx->invalid_state_emulation_result != EMULATE_DO_MMIO;
     }
 
@@ -3210,6 +3211,7 @@ static int kvm_handle_exit(struct kvm_run *kvm_run, struct kvm_vcpu *vcpu)
         kvm_run->exit_reason = KVM_EXIT_FAIL_ENTRY;
         kvm_run->fail_entry.hardware_entry_failure_reason
             = vmcs_read32(VM_INSTRUCTION_ERROR);
+	printk("%s::%d KVM_EXIT_FAIL_ENTRY\n", __FUNCTION__,__LINE__);
         return 0;
     }
 
@@ -3243,9 +3245,12 @@ static int kvm_handle_exit(struct kvm_run *kvm_run, struct kvm_vcpu *vcpu)
 
     if (exit_reason < kvm_vmx_max_exit_handlers
         && kvm_vmx_exit_handlers[exit_reason])
+    	{
+        printk("%s::%d KVM_EXIT_KNOWN\n", __FUNCTION__,__LINE__);
         return kvm_vmx_exit_handlers[exit_reason](vcpu, kvm_run);
+    	}
     else {
-		printk("%s::%d KVM_EXIT_UNKNOWN\n", __FUNCTION__,__LINE__);
+	 printk("%s::%d KVM_EXIT_UNKNOWN\n", __FUNCTION__,__LINE__);
         kvm_run->exit_reason = KVM_EXIT_UNKNOWN;
         kvm_run->hw.hardware_exit_reason = exit_reason;
     }
