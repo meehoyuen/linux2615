@@ -224,10 +224,10 @@ struct kvm_interrupt {
 /* for KVM_GET_DIRTY_LOG */
 struct kvm_dirty_log {
 	__u32 slot;
-	__u32 padding;
+	__u32 padding32;
 	union {
 		void __user *dirty_bitmap; /* one bit per page */
-		__u64 padding;
+		__u64 padding64;
 	};
 };
 

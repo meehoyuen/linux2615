@@ -321,7 +321,7 @@ include  $(srctree)/scripts/Kbuild.include
 
 AS		= $(CROSS_COMPILE)as
 LD		= $(CROSS_COMPILE)ld
-CC		= $(CROSS_COMPILE)gcc-4.0
+CC		= $(CROSS_COMPILE)gcc
 CPP		= $(CC) -E
 AR		= $(CROSS_COMPILE)ar
 NM		= $(CROSS_COMPILE)nm
@@ -337,10 +337,10 @@ CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise $(CF)
 MODFLAGS	= -DMODULE
-CFLAGS_MODULE   = $(MODFLAGS)
+CFLAGS_MODULE   = $(MODFLAGS) -fno-stack-protector
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -r
-CFLAGS_KERNEL	=
+CFLAGS_KERNEL	= -fno-stack-protector
 AFLAGS_KERNEL	=
 
 

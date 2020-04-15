@@ -1,0 +1,10 @@
+vmlinux
+System.map
+include/linux/autoconf.h
+include/linux/version.h
+*.o
+*.cmd
+*/*.o
+*/*.cmd
+*/*/*.o
+*/*/*.cmd
