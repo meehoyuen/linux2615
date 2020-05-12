@@ -478,7 +478,7 @@ static inline unsigned long page_to_section(struct page *page)
     return (page->flags >> SECTIONS_PGSHIFT) & SECTIONS_MASK;
 }
 
-static inline void set_page_zone(struct page *page, unsigned long zone)
+static noinline void set_page_zone(struct page *page, unsigned long zone)
 {
     page->flags &= ~(ZONES_MASK << ZONES_PGSHIFT);
     page->flags |= (zone & ZONES_MASK) << ZONES_PGSHIFT;
