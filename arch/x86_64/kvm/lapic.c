@@ -1,4 +1,3 @@
-
 /*
  * Local APIC virtualization
  *

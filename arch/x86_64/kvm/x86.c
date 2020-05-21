@@ -1617,7 +1617,7 @@ static int kvm_vm_ioctl_set_memory_alias(struct kvm *kvm,
 
     p = &kvm->arch.aliases[alias->slot];
     p->base_gfn = alias->guest_phys_addr >> PAGE_SHIFT;
-	printk("%s::%d base_gfn:%lx\n", __FUNCTION__,__LINE__,p->base_gfn);
+    printk("%s::%d base_gfn:%lx\n", __FUNCTION__,__LINE__,p->base_gfn);
     p->npages = alias->memory_size >> PAGE_SHIFT;
     p->target_gfn = alias->target_phys_addr >> PAGE_SHIFT;
 
@@ -2510,7 +2510,7 @@ int kvm_emulate_pio(struct kvm_vcpu *vcpu, struct kvm_run *run, int in,
     struct kvm_io_device *pio_dev;
     unsigned long val;
 
-	printk("%s::%d KVM_EXIT_IO\n", __FUNCTION__,__LINE__);
+    printk("%s::%d KVM_EXIT_IO\n", __FUNCTION__,__LINE__);
 
     vcpu->run->exit_reason = KVM_EXIT_IO;
     vcpu->run->io.direction = in ? KVM_EXIT_IO_IN : KVM_EXIT_IO_OUT;
@@ -2551,7 +2551,7 @@ int kvm_emulate_pio_string(struct kvm_vcpu *vcpu, struct kvm_run *run, int in,
     int ret = 0;
     struct kvm_io_device *pio_dev;
 
-	printk("%s::%d KVM_EXIT_IO\n", __FUNCTION__,__LINE__);
+    printk("%s::%d KVM_EXIT_IO\n", __FUNCTION__,__LINE__);
 
     vcpu->run->exit_reason = KVM_EXIT_IO;
     vcpu->run->io.direction = in ? KVM_EXIT_IO_IN : KVM_EXIT_IO_OUT;
@@ -2751,7 +2751,7 @@ int kvm_emulate_halt(struct kvm_vcpu *vcpu)
         vcpu->arch.mp_state = KVM_MP_STATE_HALTED;
         return 1;
     } else {
-		printk("%s::%d KVM_EXIT_HLT\n", __FUNCTION__,__LINE__);
+        printk("%s::%d KVM_EXIT_HLT\n", __FUNCTION__,__LINE__);
         vcpu->run->exit_reason = KVM_EXIT_HLT;
         return 0;
     }
@@ -3259,7 +3259,7 @@ printk("%s::%d\n", __FUNCTION__,__LINE__);
         sigprocmask(SIG_SETMASK, &vcpu->sigset, &sigsaved);
 printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (unlikely(vcpu->arch.mp_state == KVM_MP_STATE_UNINITIALIZED)) {
-		printk("%s::%d\n", __FUNCTION__,__LINE__);
+        printk("%s::%d\n", __FUNCTION__,__LINE__);
         kvm_vcpu_block(vcpu);
         clear_bit(KVM_REQ_UNHALT, &vcpu->requests);
         r = -EAGAIN;
@@ -3271,7 +3271,7 @@ printk("%s::%d\n", __FUNCTION__,__LINE__);
         kvm_set_cr8(vcpu, kvm_run->cr8);
 printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (vcpu->arch.pio.cur_count) {
-		printk("%s::%d\n", __FUNCTION__,__LINE__);
+        printk("%s::%d\n", __FUNCTION__,__LINE__);
         r = complete_pio(vcpu);
         if (r)
             goto out;

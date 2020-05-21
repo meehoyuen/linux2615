@@ -1363,10 +1363,10 @@ static gva_t rmode_tss_base(struct kvm *kvm)
     if (!kvm->arch.tss_addr) {
         gfn_t base_gfn = kvm->memslots[0].base_gfn +
                  kvm->memslots[0].npages - 3;  //why - 3????
-	printk("%s::%d base_gfn:%lx = %lx + %lx - 3\n", __FUNCTION__,__LINE__,base_gfn,kvm->memslots[0].base_gfn,kvm->memslots[0].npages);			 
+    printk("%s::%d base_gfn:%lx = %lx + %lx - 3\n", __FUNCTION__,__LINE__,base_gfn,kvm->memslots[0].base_gfn,kvm->memslots[0].npages);
         return base_gfn << PAGE_SHIFT;
     }
-	printk("%s::%d kvm->arch.tss_addr:%lx\n", __FUNCTION__,__LINE__,kvm->arch.tss_addr);
+    printk("%s::%d kvm->arch.tss_addr:%lx\n", __FUNCTION__,__LINE__,kvm->arch.tss_addr);
     return kvm->arch.tss_addr;
 }
 
@@ -2014,7 +2014,7 @@ printk("%s::%d\n", __FUNCTION__,__LINE__);
             _PAGE_ACCESSED | _PAGE_DIRTY | _PAGE_PSE);
         r = kvm_write_guest_page(kvm, identity_map_pfn,
                 &tmp, i * sizeof(tmp), sizeof(tmp));
-		printk("%s::%d\n", __FUNCTION__,__LINE__);
+        printk("%s::%d\n", __FUNCTION__,__LINE__);
         if (r < 0)
             goto out;
     }
@@ -3092,7 +3092,7 @@ static int handle_ept_violation(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
             (long unsigned int)vmcs_read64(GUEST_LINEAR_ADDRESS));
         printk(KERN_ERR "EPT: Exit qualification is 0x%lx\n",
             (long unsigned int)exit_qualification);
-		printk("%s::%d KVM_EXIT_UNKNOWN ept violation\n", __FUNCTION__,__LINE__);
+        printk("%s::%d KVM_EXIT_UNKNOWN ept violation\n", __FUNCTION__,__LINE__);
         kvm_run->exit_reason = KVM_EXIT_UNKNOWN;
         kvm_run->hw.hardware_exit_reason = 0;
         return -ENOTSUPP;
@@ -3196,7 +3196,7 @@ static int kvm_handle_exit(struct kvm_run *kvm_run, struct kvm_vcpu *vcpu)
     if (vmx->emulation_required && emulate_invalid_guest_state) {
         if (guest_state_valid(vcpu))
             vmx->emulation_required = 0;
-	 printk("%s::%d EMULATE_DO_MMIO\n", __FUNCTION__,__LINE__);
+     printk("%s::%d EMULATE_DO_MMIO\n", __FUNCTION__,__LINE__);
         return vmx->invalid_state_emulation_result != EMULATE_DO_MMIO;
     }
 
@@ -3211,7 +3211,7 @@ static int kvm_handle_exit(struct kvm_run *kvm_run, struct kvm_vcpu *vcpu)
         kvm_run->exit_reason = KVM_EXIT_FAIL_ENTRY;
         kvm_run->fail_entry.hardware_entry_failure_reason
             = vmcs_read32(VM_INSTRUCTION_ERROR);
-	printk("%s::%d KVM_EXIT_FAIL_ENTRY\n", __FUNCTION__,__LINE__);
+    printk("%s::%d KVM_EXIT_FAIL_ENTRY\n", __FUNCTION__,__LINE__);
         return 0;
     }
 
@@ -3245,12 +3245,12 @@ static int kvm_handle_exit(struct kvm_run *kvm_run, struct kvm_vcpu *vcpu)
 
     if (exit_reason < kvm_vmx_max_exit_handlers
         && kvm_vmx_exit_handlers[exit_reason])
-    	{
+        {
         printk("%s::%d KVM_EXIT_KNOWN\n", __FUNCTION__,__LINE__);
         return kvm_vmx_exit_handlers[exit_reason](vcpu, kvm_run);
-    	}
+        }
     else {
-	 printk("%s::%d KVM_EXIT_UNKNOWN\n", __FUNCTION__,__LINE__);
+     printk("%s::%d KVM_EXIT_UNKNOWN\n", __FUNCTION__,__LINE__);
         kvm_run->exit_reason = KVM_EXIT_UNKNOWN;
         kvm_run->hw.hardware_exit_reason = exit_reason;
     }
@@ -3639,16 +3639,16 @@ printk("%s::%d\n", __FUNCTION__,__LINE__);
 printk("%s::%d\n", __FUNCTION__,__LINE__);
 free_vmcs:
     free_vmcs(vmx->vmcs);
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
 free_msrs:
     kfree(vmx->host_msrs);
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
 free_guest_msrs:
     kfree(vmx->guest_msrs);
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
 uninit_vcpu:
     kvm_vcpu_uninit(&vmx->vcpu);
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
 free_vcpu:
     kmem_cache_free(kvm_vcpu_cache, vmx);
     return ERR_PTR(err);

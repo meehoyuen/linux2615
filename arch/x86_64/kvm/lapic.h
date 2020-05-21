@@ -6,19 +6,19 @@
 #include <linux/kvm_host.h>
 
 struct kvm_lapic {
-	unsigned long base_address;
-	struct kvm_io_device dev;
-	struct {
-		atomic_t pending;
-		s64 period;	/* unit: ns */
-		u32 divide_count;
-		//struct hrtimer dev;
-	} timer;
-	struct kvm_vcpu *vcpu;
-	struct page *regs_page;
-	void *regs;
-	gpa_t vapic_addr;
-	struct page *vapic_page;
+    unsigned long base_address;
+    struct kvm_io_device dev;
+    struct {
+        atomic_t pending;
+        s64 period; /* unit: ns */
+        u32 divide_count;
+        //struct hrtimer dev;
+    } timer;
+    struct kvm_vcpu *vcpu;
+    struct page *regs_page;
+    void *regs;
+    gpa_t vapic_addr;
+    struct page *vapic_page;
 };
 int kvm_create_lapic(struct kvm_vcpu *vcpu);
 void kvm_free_lapic(struct kvm_vcpu *vcpu);

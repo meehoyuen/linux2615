@@ -1158,10 +1158,10 @@ unsigned long gfn_to_hva(struct kvm *kvm, gfn_t gfn)
     gfn = unalias_gfn(kvm, gfn);
     slot = gfn_to_memslot_unaliased(kvm, gfn);
     if (!slot)
-	{
-		printk("%s::%d gfn:%lx, slot:%lx\n", __FUNCTION__,__LINE__,gfn,slot);
+    {
+        printk("%s::%d gfn:%lx, slot:%lx\n", __FUNCTION__,__LINE__,gfn,slot);
         return bad_hva();
-	}
+    }
     return (slot->userspace_addr + (gfn - slot->base_gfn) * PAGE_SIZE);
 }
 EXPORT_SYMBOL_GPL(gfn_to_hva);
@@ -1351,17 +1351,17 @@ int kvm_write_guest_page(struct kvm *kvm, gfn_t gfn, const void *data,
 
     addr = gfn_to_hva(kvm, gfn);
     if (kvm_is_error_hva(addr))
-	{
-		printk("%s::%d gfn:%llx, addr:%llx\n", __FUNCTION__,__LINE__,gfn,addr);
+    {
+        printk("%s::%d gfn:%llx, addr:%llx\n", __FUNCTION__,__LINE__,gfn,addr);
         return -EFAULT;
-	}
+    }
     r = copy_to_user((void __user *)addr + offset, data, len);
     if (r)
-	{
-		printk("%s::%d\n", __FUNCTION__,__LINE__);
+    {
+        printk("%s::%d\n", __FUNCTION__,__LINE__);
         return -EFAULT;
-	}
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    }
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     mark_page_dirty(kvm, gfn);
     return 0;
 }
@@ -1479,15 +1479,15 @@ printk("%s::%d addr:%lx off:%lx\n", __FUNCTION__,__LINE__,address,vma->vm_pgoff)
         return NOPAGE_SIGBUS;
 printk("%s::%d address:%lx\n", __FUNCTION__,__LINE__,page);
     get_page(page);
-	//struct page *p = virt_to_page(address - vma->vm_start + syscall32_page);
-	//get_page(p);
-	//return p;
+    //struct page *p = virt_to_page(address - vma->vm_start + syscall32_page);
+    //get_page(p);
+    //return p;
     return page;
 }
 
 static int kvm_vcpu_populate(struct vm_area_struct *vma, unsigned long addr, unsigned long len, pgprot_t prot, unsigned long pgoff, int nonblock)
 {
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     //tobedone with kvm_vcpu_populate
     return 0;
 }
@@ -1919,13 +1919,13 @@ out:
 
 static struct page *kvm_vm_nopage(struct vm_area_struct *vma, unsigned long address, int *type)
 {
-	int npages;
+    int npages;
     struct page *page[1];
     unsigned long addr = 0;
     gfn_t gfn = vma->vm_pgoff;
     struct kvm *kvm = vma->vm_file->private_data;
 
-	printk("%s::%d addr:%lx  off:%lx\n", __FUNCTION__,__LINE__,address,vma->vm_pgoff);
+    printk("%s::%d addr:%lx  off:%lx\n", __FUNCTION__,__LINE__,address,vma->vm_pgoff);
 
     addr = gfn_to_hva(kvm, gfn);
     if (kvm_is_error_hva(addr))
@@ -1941,7 +1941,7 @@ static struct page *kvm_vm_nopage(struct vm_area_struct *vma, unsigned long addr
 static int kvm_vm_populate(struct vm_area_struct *vma, unsigned long addr, unsigned long len, pgprot_t prot, unsigned long pgoff, int nonblock)
 {
     //tobedone with kvm_vm_populate
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     return 0;
 }
 
@@ -2337,28 +2337,28 @@ EXPORT_SYMBOL_GPL(kvm_init);
 
 void kvm_exit(void)
 {
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     misc_deregister(&kvm_dev);
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     kmem_cache_destroy(kvm_vcpu_cache);
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     sysdev_unregister(&kvm_sysdev);
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     sysdev_class_unregister(&kvm_sysdev_class);
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     unregister_reboot_notifier(&kvm_reboot_notifier);
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     unregister_cpu_notifier(&kvm_cpu_notifier);
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     on_each_cpu(hardware_disable, NULL, 0, 1);
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     kvm_arch_hardware_unsetup();
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     kvm_arch_exit();
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     kvm_exit_debug();
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
     __free_page(bad_page);
-	printk("%s::%d\n", __FUNCTION__,__LINE__);
+    printk("%s::%d\n", __FUNCTION__,__LINE__);
 }
 EXPORT_SYMBOL_GPL(kvm_exit);
