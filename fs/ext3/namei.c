@@ -819,14 +819,10 @@ static struct buffer_head * ext3_find_entry (struct dentry *dentry,
 	int nblocks, i, err;
 	struct inode *dir = dentry->d_parent->d_inode;
 	int namelen;
-	const u8 *name;
-	unsigned blocksize;
 
 	*res_dir = NULL;
 	sb = dir->i_sb;
-	blocksize = sb->s_blocksize;
 	namelen = dentry->d_name.len;
-	name = dentry->d_name.name;
 	if (namelen > EXT3_NAME_LEN)
 		return NULL;
 #ifdef CONFIG_EXT3_INDEX
@@ -1373,7 +1369,6 @@ static int ext3_add_entry (handle_t *handle, struct dentry *dentry,
 	struct inode *inode)
 {
 	struct inode *dir = dentry->d_parent->d_inode;
-	unsigned long offset;
 	struct buffer_head * bh;
 	struct ext3_dir_entry_2 *de;
 	struct super_block * sb;
@@ -1382,7 +1377,7 @@ static int ext3_add_entry (handle_t *handle, struct dentry *dentry,
 	int	dx_fallback=0;
 #endif
 	unsigned blocksize;
-	unsigned nlen, rlen;
+	unsigned rlen;
 	u32 block, blocks;
 
 	sb = dir->i_sb;
@@ -1400,7 +1395,7 @@ static int ext3_add_entry (handle_t *handle, struct dentry *dentry,
 	}
 #endif
 	blocks = dir->i_size >> sb->s_blocksize_bits;
-	for (block = 0, offset = 0; block < blocks; block++) {
+	for (block = 0; block < blocks; block++) {
 		bh = ext3_bread(handle, dir, block, 0, &retval);
 		if(!bh)
 			return retval;
@@ -1421,7 +1416,6 @@ static int ext3_add_entry (handle_t *handle, struct dentry *dentry,
 	de = (struct ext3_dir_entry_2 *) bh->b_data;
 	de->inode = 0;
 	de->rec_len = cpu_to_le16(rlen = blocksize);
-	nlen = 0;
 	return add_dirent_to_buf(handle, dentry, inode, de, bh);
 }
 

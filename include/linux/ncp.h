@@ -21,12 +21,12 @@
 
 struct ncp_request_header {
 	__u16 type __attribute__((packed));
-	__u8 sequence __attribute__((packed));
-	__u8 conn_low __attribute__((packed));
-	__u8 task __attribute__((packed));
-	__u8 conn_high __attribute__((packed));
-	__u8 function __attribute__((packed));
-	__u8 data[0] __attribute__((packed));
+	__u8 sequence /*__attribute__((packed))*/;
+	__u8 conn_low /*__attribute__((packed))*/;
+	__u8 task /*__attribute__((packed))*/;
+	__u8 conn_high /*__attribute__((packed))*/;
+	__u8 function /*__attribute__((packed))*/;
+	__u8 data[0] /*__attribute__((packed))*/;
 };
 
 #define NCP_REPLY                (0x3333)
@@ -35,13 +35,13 @@ struct ncp_request_header {
 
 struct ncp_reply_header {
 	__u16 type __attribute__((packed));
-	__u8 sequence __attribute__((packed));
-	__u8 conn_low __attribute__((packed));
-	__u8 task __attribute__((packed));
-	__u8 conn_high __attribute__((packed));
-	__u8 completion_code __attribute__((packed));
-	__u8 connection_state __attribute__((packed));
-	__u8 data[0] __attribute__((packed));
+	__u8 sequence /*__attribute__((packed))*/;
+	__u8 conn_low /*__attribute__((packed))*/;
+	__u8 task /*__attribute__((packed))*/;
+	__u8 conn_high /*__attribute__((packed))*/;
+	__u8 completion_code /*__attribute__((packed))*/;
+	__u8 connection_state /*__attribute__((packed))*/;
+	__u8 data[0] /*__attribute__((packed))*/;
 };
 
 #define NCP_VOLNAME_LEN (16)
@@ -152,8 +152,8 @@ struct nw_info_struct {
 	__u32 EAKeyCount __attribute__((packed));
 	__u32 EAKeySize __attribute__((packed));
 	__u32 NSCreator __attribute__((packed));
-	__u8 nameLen __attribute__((packed));
-	__u8 entryName[256] __attribute__((packed));
+	__u8 nameLen /*__attribute__((packed))*/;
+	__u8 entryName[256] /*__attribute__((packed))*/;
 	/* libncp may depend on there being nothing after entryName */
 #ifdef __KERNEL__
 	struct nw_nfs_info nfs;
@@ -193,7 +193,7 @@ struct nw_modify_dos_info {
 };
 
 struct nw_search_sequence {
-	__u8 volNumber __attribute__((packed));
+	__u8 volNumber /*__attribute__((packed))*/;
 	__u32 dirBase __attribute__((packed));
 	__u32 sequence __attribute__((packed));
 };
