@@ -1537,8 +1537,8 @@ long kvm_arch_vcpu_ioctl(struct file *filp, unsigned int ioctl, unsigned long ar
         r = -EINVAL;
     }
 out:
-    if (lapic)
-        kfree(lapic);
+    if (lapic_state)
+        kfree(lapic_state);
     return r;
 }
 
