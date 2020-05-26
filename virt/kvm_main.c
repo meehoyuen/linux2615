@@ -1120,7 +1120,6 @@ struct kvm_memory_slot *gfn_to_memslot_unaliased(struct kvm *kvm, gfn_t gfn)
 
     for (i = 0; i < kvm->nmemslots; ++i) {
         struct kvm_memory_slot *memslot = &kvm->memslots[i];
-printk("%s::%d gfn:%lx, range:%lx-%lx\n", __FUNCTION__,__LINE__,gfn,memslot->base_gfn,memslot->base_gfn + memslot->npages);
         if (gfn >= memslot->base_gfn
             && gfn < memslot->base_gfn + memslot->npages)
             return memslot;
