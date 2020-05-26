@@ -3092,13 +3092,14 @@ static int handle_ept_violation(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
             (long unsigned int)vmcs_read64(GUEST_LINEAR_ADDRESS));
         printk(KERN_ERR "EPT: Exit qualification is 0x%lx\n",
             (long unsigned int)exit_qualification);
-        printk("%s::%d KVM_EXIT_UNKNOWN ept violation\n", __FUNCTION__,__LINE__);
+        printk("%s::%d KVM_EXIT_UNKNOWN ept violation\n", __FUNCTION__, __LINE__);
         kvm_run->exit_reason = KVM_EXIT_UNKNOWN;
         kvm_run->hw.hardware_exit_reason = 0;
         return -ENOTSUPP;
     }
 
     gpa = vmcs_read64(GUEST_PHYSICAL_ADDRESS);
+    printk("%s::%d ept violation %lx\n", __FUNCTION__, __LINE__, gpa);
     return kvm_mmu_page_fault(vcpu, gpa & PAGE_MASK, 0);
 }
 
@@ -3187,7 +3188,7 @@ static int kvm_handle_exit(struct kvm_run *kvm_run, struct kvm_vcpu *vcpu)
     u32 exit_reason = vmcs_read32(VM_EXIT_REASON);
     struct vcpu_vmx *vmx = to_vmx(vcpu);
     u32 vectoring_info = vmx->idt_vectoring_info;
-    printk("%s::%d reson:0x%x\n", __FUNCTION__, __LINE__,exit_reason);
+
     KVMTRACE_3D(VMEXIT, vcpu, exit_reason, (u32)kvm_rip_read(vcpu),
             (u32)((u64)kvm_rip_read(vcpu) >> 32), entryexit);
 
@@ -3245,12 +3246,12 @@ static int kvm_handle_exit(struct kvm_run *kvm_run, struct kvm_vcpu *vcpu)
 
     if (exit_reason < kvm_vmx_max_exit_handlers
         && kvm_vmx_exit_handlers[exit_reason])
-        {
-        printk("%s::%d KVM_EXIT_KNOWN\n", __FUNCTION__,__LINE__);
+    {
+        printk("%s::%d KVM_EXIT_%d\n", __FUNCTION__, __LINE__, exit_reason);
         return kvm_vmx_exit_handlers[exit_reason](vcpu, kvm_run);
-        }
+    }
     else {
-     printk("%s::%d KVM_EXIT_UNKNOWN\n", __FUNCTION__,__LINE__);
+        printk("%s::%d KVM_EXIT_UNKNOWN\n", __FUNCTION__, __LINE__);
         kvm_run->exit_reason = KVM_EXIT_UNKNOWN;
         kvm_run->hw.hardware_exit_reason = exit_reason;
     }
