@@ -1169,6 +1169,7 @@ pfn_t gfn_to_pfn(struct kvm *kvm, gfn_t gfn)
 {
     struct page *page[1];
     unsigned long addr;
+    struct mm_struct *mm = current->mm;
     int npages;
     pfn_t pfn;
 
@@ -1180,7 +1181,9 @@ pfn_t gfn_to_pfn(struct kvm *kvm, gfn_t gfn)
         return page_to_pfn(bad_page);
     }
 
-    //npages = get_user_pages_fast(addr, 1, 1, page);
+    down_read(&mm->mmap_sem);
+    npages = get_user_pages(current, mm, addr, 1, 1, 0, page, NULL);
+    up_read(&mm->mmap_sem);
 
     if (unlikely(npages != 1)) {
         struct vm_area_struct *vma;
