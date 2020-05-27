@@ -3247,7 +3247,7 @@ static int kvm_handle_exit(struct kvm_run *kvm_run, struct kvm_vcpu *vcpu)
     if (exit_reason < kvm_vmx_max_exit_handlers
         && kvm_vmx_exit_handlers[exit_reason])
     {
-        printk("%s::%d KVM_EXIT_%d\n", __FUNCTION__, __LINE__, exit_reason);
+        //printk("%s::%d KVM_EXIT_%d\n", __FUNCTION__, __LINE__, exit_reason);
         return kvm_vmx_exit_handlers[exit_reason](vcpu, kvm_run);
     }
     else {

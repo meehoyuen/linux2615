@@ -1463,41 +1463,32 @@ void kvm_resched(struct kvm_vcpu *vcpu)
     cond_resched();
 }
 EXPORT_SYMBOL_GPL(kvm_resched);
-
 static struct page *kvm_vcpu_nopage(struct vm_area_struct *vma, unsigned long address, int *type)
 {
     struct kvm_vcpu *vcpu = vma->vm_file->private_data;
     struct page *page = NULL;
-printk("%s::%d addr:%lx off:%lx\n", __FUNCTION__,__LINE__,address,vma->vm_pgoff);
-    if (vma->vm_pgoff == 0)
+    long int offset = (address - vma->vm_start) >> PAGE_SHIFT;
+
+    printk("%s::%d addr:%lx off:%lx\n", __FUNCTION__,__LINE__,address,offset);
+
+    if (offset == 0)
         page = virt_to_page(vcpu->run);
-    else if (vma->vm_pgoff == KVM_PIO_PAGE_OFFSET)
+    else if (offset == KVM_PIO_PAGE_OFFSET)
         page = virt_to_page(vcpu->arch.pio_data);
 #ifdef KVM_COALESCED_MMIO_PAGE_OFFSET
-    else if (vma->vm_pgoff == KVM_COALESCED_MMIO_PAGE_OFFSET)
+    else if (offset == KVM_COALESCED_MMIO_PAGE_OFFSET)
         page = virt_to_page(vcpu->kvm->coalesced_mmio_ring);
 #endif
     else
         return NOPAGE_SIGBUS;
-printk("%s::%d address:%lx\n", __FUNCTION__,__LINE__,page);
+
     get_page(page);
-    //struct page *p = virt_to_page(address - vma->vm_start + syscall32_page);
-    //get_page(p);
-    //return p;
+
     return page;
 }
 
-static int kvm_vcpu_populate(struct vm_area_struct *vma, unsigned long addr, unsigned long len, pgprot_t prot, unsigned long pgoff, int nonblock)
-{
-    printk("%s::%d\n", __FUNCTION__,__LINE__);
-    //tobedone with kvm_vcpu_populate
-    return 0;
-}
-
-
 static struct vm_operations_struct kvm_vcpu_vm_ops = {
     .nopage = kvm_vcpu_nopage,
-    .populate = kvm_vcpu_populate,
 };
 
 static int kvm_vcpu_mmap(struct file *file, struct vm_area_struct *vma)
@@ -1924,10 +1915,10 @@ static struct page *kvm_vm_nopage(struct vm_area_struct *vma, unsigned long addr
     int npages;
     struct page *page[1];
     unsigned long addr = 0;
-    gfn_t gfn = vma->vm_pgoff;
+    gfn_t gfn = (address - vma->vm_start) >> PAGE_SHIFT;
     struct kvm *kvm = vma->vm_file->private_data;
 
-    printk("%s::%d addr:%lx  off:%lx\n", __FUNCTION__,__LINE__,address,vma->vm_pgoff);
+    printk("################%s::%d note: addr:%lx off:%lx###############\n", __FUNCTION__,__LINE__,address,vma->vm_pgoff);
 
     addr = gfn_to_hva(kvm, gfn);
     if (kvm_is_error_hva(addr))
@@ -1940,16 +1931,8 @@ static struct page *kvm_vm_nopage(struct vm_area_struct *vma, unsigned long addr
     return page[0];
 }
 
-static int kvm_vm_populate(struct vm_area_struct *vma, unsigned long addr, unsigned long len, pgprot_t prot, unsigned long pgoff, int nonblock)
-{
-    //tobedone with kvm_vm_populate
-    printk("%s::%d\n", __FUNCTION__,__LINE__);
-    return 0;
-}
-
 static struct vm_operations_struct kvm_vm_vm_ops = {
     .nopage = kvm_vm_nopage,
-    .populate = kvm_vm_populate,
 };
 
 static int kvm_vm_mmap(struct file *file, struct vm_area_struct *vma)

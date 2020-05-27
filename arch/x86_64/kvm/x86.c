@@ -2510,8 +2510,6 @@ int kvm_emulate_pio(struct kvm_vcpu *vcpu, struct kvm_run *run, int in,
     struct kvm_io_device *pio_dev;
     unsigned long val;
 
-    printk("%s::%d KVM_EXIT_IO\n", __FUNCTION__,__LINE__);
-
     vcpu->run->exit_reason = KVM_EXIT_IO;
     vcpu->run->io.direction = in ? KVM_EXIT_IO_IN : KVM_EXIT_IO_OUT;
     vcpu->run->io.size = vcpu->arch.pio.size = size;
@@ -3252,36 +3250,32 @@ int kvm_arch_vcpu_ioctl_run(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
 {
     int r;
     sigset_t sigsaved;
-printk("%s::%d\n", __FUNCTION__,__LINE__);
+
     vcpu_load(vcpu);
-printk("%s::%d\n", __FUNCTION__,__LINE__);
     if (vcpu->sigset_active)
         sigprocmask(SIG_SETMASK, &vcpu->sigset, &sigsaved);
-printk("%s::%d\n", __FUNCTION__,__LINE__);
+
     if (unlikely(vcpu->arch.mp_state == KVM_MP_STATE_UNINITIALIZED)) {
-        printk("%s::%d\n", __FUNCTION__,__LINE__);
         kvm_vcpu_block(vcpu);
         clear_bit(KVM_REQ_UNHALT, &vcpu->requests);
         r = -EAGAIN;
         goto out;
     }
-printk("%s::%d\n", __FUNCTION__,__LINE__);
+
     /* re-sync apic's tpr */
     if (!irqchip_in_kernel(vcpu->kvm))
         kvm_set_cr8(vcpu, kvm_run->cr8);
-printk("%s::%d\n", __FUNCTION__,__LINE__);
+
     if (vcpu->arch.pio.cur_count) {
-        printk("%s::%d\n", __FUNCTION__,__LINE__);
         r = complete_pio(vcpu);
         if (r)
             goto out;
     }
-printk("%s::%d\n", __FUNCTION__,__LINE__);
+
     if (vcpu->mmio_needed) {
         memcpy(vcpu->mmio_data, kvm_run->mmio.data, 8);
         vcpu->mmio_read_completed = 1;
         vcpu->mmio_needed = 0;
-printk("%s::%d\n", __FUNCTION__,__LINE__);
         down_read(&vcpu->kvm->slots_lock);
         r = emulate_instruction(vcpu, kvm_run,
                     vcpu->arch.mmio_fault_cr2, 0,
@@ -3292,23 +3286,21 @@ printk("%s::%d\n", __FUNCTION__,__LINE__);
              * Read-modify-write.  Back to userspace.
              */
             r = 0;
-printk("%s::%d\n", __FUNCTION__,__LINE__);
             goto out;
         }
     }
-printk("%s::%d\n", __FUNCTION__,__LINE__);
+
     if (kvm_run->exit_reason == KVM_EXIT_HYPERCALL)
         kvm_register_write(vcpu, VCPU_REGS_RAX,
                      kvm_run->hypercall.ret);
-printk("%s::%d\n", __FUNCTION__,__LINE__);
+
     r = __vcpu_run(vcpu, kvm_run);
-printk("%s::%d\n", __FUNCTION__,__LINE__);
 out:
     if (vcpu->sigset_active)
         sigprocmask(SIG_SETMASK, &sigsaved, NULL);
-printk("%s::%d\n", __FUNCTION__,__LINE__);
+
     vcpu_put(vcpu);
-printk("%s::%d\n", __FUNCTION__,__LINE__);
+
     return r;
 }
 
